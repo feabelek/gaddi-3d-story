@@ -1,35 +1,130 @@
 # Pastoralism Atlas
 
-An interactive MapLibre story map exploring the seasonal migration route of Gaddi pastoralists from Bharmour to Darcha in Himachal Pradesh.
+An interactive visual story about the seasonal migration of Gaddi pastoralists from Bharmour to Darcha in Himachal Pradesh.
 
-## Run Locally
+This guide explains how to open the project on your own computer. You do not need to understand the code to follow it.
+
+## What You Will See
+
+The atlas opens on a map of India. Select the Himachal Pradesh case study, then scroll through the story to follow the route through Bharmour, Kugti, Tandi, and Darcha.
+
+## Before You Begin
+
+You will need:
+
+- A computer connected to the internet
+- A modern web browser such as Chrome, Firefox, Safari, or Edge
+- Node.js, which lets the project run on your computer
+
+### Install Node.js
+
+1. Go to [nodejs.org](https://nodejs.org/).
+2. Download the **LTS** version.
+3. Install it using the default options.
+4. Close and reopen your Terminal (macOS/Linux) or PowerShell (Windows).
+
+The project needs Node.js `20.19` or newer, or Node.js `22.12` or newer. The current LTS download from the Node.js website should satisfy this requirement.
+
+## Open the Project
+
+### 1. Download the project
+
+Open the project page on GitHub:
+
+<https://github.com/feabelek/gaddi-3d-story>
+
+Choose **Code**, then **Download ZIP**. Unzip the downloaded file somewhere easy to find, such as your Desktop.
+
+### 2. Open a command window in the project folder
+
+Open the Terminal application on macOS/Linux, or PowerShell on Windows.
+
+Move into the unzipped project folder. For example, if it is on your Desktop:
+
+```bash
+cd ~/Desktop/gaddi-3d-story
+```
+
+On Windows PowerShell, the equivalent is usually:
+
+```powershell
+cd "$HOME\Desktop\gaddi-3d-story"
+```
+
+If the folder has a different name or location, replace the path with the actual location of your folder.
+
+### 3. Install the project’s supporting files
+
+Run this command once:
 
 ```bash
 npm install
+```
+
+Wait for it to finish. This creates a `node_modules` folder containing the libraries the atlas needs. You do not need to open or edit this folder.
+
+### 4. Start the atlas
+
+Run:
+
+```bash
 npm run dev
 ```
 
-Open the local URL printed by Vite. The map uses remote Esri satellite and AWS terrain tiles, so the browser needs network access for the full experience.
+The Terminal will display a local web address, usually similar to:
 
-## Commands
-
-```bash
-npm run dev       # Start the Vite development server
-npm run build     # Create the production bundle in dist/
-npm run preview   # Serve the production bundle locally
+```text
+http://localhost:5173/
 ```
 
-## Project Structure
+Open that address in your web browser. Keep the command window open while using the atlas.
 
-- `src/main.js` contains the live MapLibre map, atlas UI, story chapters, camera transitions, and route layers.
-- `src/style.css` contains the application styling and responsive layout.
-- `public/data/` contains route and point GeoJSON, GIS source files, terrain data, and story images.
-- `index.html` is the application shell and loads `src/main.js`.
+### 5. Explore the story
 
-The route and point data are loaded at runtime from root-relative `/data/...` URLs. Keep those paths unchanged when adding or moving public assets.
+1. Select the **Himachal Pradesh** marker on the map.
+2. Scroll down to move through the story.
+3. Use the **Atlas** button to return to the India overview.
 
-`src/main copy.js` is an unused legacy Three.js implementation and is not part of the current application.
+The map uses online satellite and terrain imagery, so the internet connection must remain active while viewing it.
 
-## Verification
+### 6. Stop the atlas
 
-There are currently no test, lint, typecheck, or format scripts. Run `npm run build` to verify the production bundle.
+Return to the Terminal or PowerShell window and press:
+
+```text
+Ctrl + C
+```
+
+## If Something Goes Wrong
+
+### The `npm` command cannot be found
+
+Node.js is not installed correctly, or the Terminal was open during installation. Install the LTS version from [nodejs.org](https://nodejs.org/), close the command window, open a new one, and try again.
+
+### The project folder cannot be found
+
+The `cd` command must point to the unzipped `gaddi-3d-story` folder. Locate that folder on your computer and use its full path after `cd`.
+
+### The map is blank or imagery is missing
+
+Check your internet connection and refresh the browser. The atlas downloads its satellite and terrain imagery from online services.
+
+### The browser address does not open
+
+Make sure `npm run dev` is still running. If the Terminal shows an error, stop the command with `Ctrl + C` and run `npm run dev` again.
+
+## For Future Updates
+
+After changing the project files, stop and restart the development server if necessary. The browser normally refreshes automatically when files are saved.
+
+To create a production version of the atlas, run:
+
+```bash
+npm run build
+```
+
+The finished files will be placed in a `dist` folder. To preview that version on your computer, run:
+
+```bash
+npm run preview
+```
