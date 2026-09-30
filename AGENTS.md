@@ -11,8 +11,8 @@
 
 ## Structure
 
-- `index.html` loads only `src/main.js`; this is the live MapLibre application entrypoint.
-- `src/main.js` owns the atlas UI, story state, camera transitions, and MapLibre layers. It fetches route and point GeoJSON from `/data/` at runtime.
+- `index.html` currently loads `src/main copy.js`, the Three.js/MapLibre case-study implementation. Change its module path to `/src/main.js` to run the alternate MapLibre-only atlas.
+- `src/main.js` owns the alternate atlas UI, story state, camera transitions, and MapLibre layers. It fetches route and point GeoJSON from `/data/` at runtime.
 - `public/data/` contains the route/point GIS files and story images. Preserve these root-relative `/data/...` URLs when moving or adding assets.
-- `src/main copy.js` is an unused legacy Three.js implementation and is not part of the current app unless `index.html` is explicitly changed.
+- `src/main copy.js` owns the current Three.js landscape, MapLibre overview, and GeoTIFF terrain loading. Its `geotiff` dependency must remain declared in `package.json`.
 - The map depends on remote Esri satellite and AWS terrain tiles, so local runtime verification needs network access even though the Vite build does not.

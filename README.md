@@ -2,7 +2,7 @@
 
 An interactive visual story about the seasonal migration of Gaddi pastoralists from Bharmour to Darcha in Himachal Pradesh.
 
-This guide explains how to open the project on your own computer. You do not need to understand the code to follow it.
+This guide explains how to open the project on your own computer. You do not need to understand the code to follow it. The currently selected version is the Three.js landscape experience from `src/main copy.js`.
 
 ## What You Will See
 
