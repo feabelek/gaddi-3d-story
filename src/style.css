@@ -1,0 +1,1295 @@
+/* ============================================================
+   PASTORALISM ATLAS
+   ============================================================ */
+
+
+/* ============================================================
+   GLOBAL
+   ============================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+
+html,
+body {
+  margin: 0;
+
+  width: 100%;
+  height: 100%;
+
+  overflow: hidden;
+
+  background: #11130f;
+
+  font-family:
+    Inter,
+    Helvetica,
+    Arial,
+    sans-serif;
+
+  color: #f4f0e6;
+}
+
+
+button {
+  font: inherit;
+}
+
+
+/* ============================================================
+   MAP
+   ============================================================ */
+
+#india-map {
+  position: fixed;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  z-index: 1;
+
+  background: #11130f;
+}
+
+
+#app {
+  display: none;
+}
+
+
+/* ============================================================
+   GLOBAL VIGNETTE
+   ============================================================ */
+
+body::after {
+  content: "";
+
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 5;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(8, 10, 8, 0.68) 0%,
+      rgba(8, 10, 8, 0.36) 22%,
+      rgba(8, 10, 8, 0.05) 48%,
+      rgba(8, 10, 8, 0) 68%
+    );
+}
+
+
+/* ============================================================
+   ATLAS HOME
+   ============================================================ */
+
+#atlas-home {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 18;
+
+  pointer-events: none;
+
+  transition:
+    opacity 650ms ease,
+    transform 800ms ease;
+}
+
+
+#atlas-home.leaving {
+  opacity: 0;
+
+  transform:
+    translateX(-12px);
+}
+
+
+#atlas-home.hidden {
+  display: none;
+}
+
+
+.atlas-intro {
+  position: absolute;
+
+  left: 52px;
+
+  top: 50%;
+
+  width: min(
+    480px,
+    38vw
+  );
+
+  transform:
+    translateY(-50%);
+}
+
+
+.atlas-kicker {
+  margin-bottom: 15px;
+
+  color: #e0b45d;
+
+  font-size: 10px;
+
+  font-weight: 600;
+
+  letter-spacing: 0.23em;
+
+  text-transform: uppercase;
+}
+
+
+.atlas-intro h1 {
+  margin: 0;
+
+  max-width: 470px;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:
+    clamp(
+      42px,
+      4.5vw,
+      72px
+    );
+
+  font-weight: 400;
+
+  line-height: 0.94;
+
+  letter-spacing: -0.045em;
+
+  color: #f7f2e8;
+}
+
+
+.atlas-intro p {
+  max-width: 390px;
+
+  margin:
+    26px
+    0
+    0;
+
+  font-size: 14px;
+
+  line-height: 1.65;
+
+  color:
+    rgba(
+      246,
+      242,
+      233,
+      0.77
+    );
+}
+
+
+.atlas-instruction {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  margin-top: 30px;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      0.52
+    );
+
+  font-size: 9px;
+
+  font-weight: 500;
+
+  letter-spacing: 0.17em;
+
+  text-transform: uppercase;
+}
+
+
+.atlas-instruction::before {
+  content: "";
+
+  display: block;
+
+  width: 22px;
+  height: 1px;
+
+  background: #e0b45d;
+}
+
+
+/* ============================================================
+   CASE STUDY MAP MARKERS
+   ============================================================ */
+
+.case-study-marker {
+  position: relative;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  min-width: 0;
+
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+
+  color: white;
+
+  text-align: left;
+
+  transform:
+    translateY(-50%);
+
+  transition:
+    opacity 400ms ease,
+    transform 400ms ease;
+
+  white-space: nowrap;
+}
+
+
+.case-study-marker.active {
+  cursor: pointer;
+
+  pointer-events: auto;
+}
+
+
+.case-study-marker.future {
+  cursor: default;
+
+  pointer-events: none;
+
+  opacity: 0.52;
+}
+
+
+.case-study-marker.leaving {
+  opacity: 0;
+
+  transform:
+    translateY(-50%)
+    scale(0.94);
+}
+
+
+/* ============================================================
+   CASE STUDY DOT
+   ============================================================ */
+
+.case-study-dot {
+  position: relative;
+
+  flex:
+    0
+    0
+    auto;
+
+  display: block;
+
+  width: 10px;
+  height: 10px;
+
+  border-radius: 50%;
+
+  background: #e2b45a;
+
+  border:
+    2px solid
+    rgba(
+      255,
+      255,
+      255,
+      0.9
+    );
+
+  box-shadow:
+    0
+    0
+    0
+    4px
+    rgba(
+      226,
+      180,
+      90,
+      0.17
+    );
+}
+
+
+.case-study-marker.active
+.case-study-dot::after {
+  content: "";
+
+  position: absolute;
+
+  left: 50%;
+  top: 50%;
+
+  width: 22px;
+  height: 22px;
+
+  border:
+    1px solid
+    rgba(
+      226,
+      180,
+      90,
+      0.48
+    );
+
+  border-radius: 50%;
+
+  transform:
+    translate(
+      -50%,
+      -50%
+    );
+
+  animation:
+    atlasPulse
+    2.5s
+    ease-out
+    infinite;
+}
+
+
+@keyframes atlasPulse {
+
+  0% {
+    opacity: 0.8;
+
+    transform:
+      translate(
+        -50%,
+        -50%
+      )
+      scale(0.5);
+  }
+
+
+  100% {
+    opacity: 0;
+
+    transform:
+      translate(
+        -50%,
+        -50%
+      )
+      scale(1.7);
+  }
+
+}
+
+
+/* ============================================================
+   CASE STUDY LABEL
+   ============================================================ */
+
+.case-study-label {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 3px;
+
+  padding:
+    8px
+    10px;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      0.13
+    );
+
+  background:
+    rgba(
+      15,
+      17,
+      14,
+      0.72
+    );
+
+  backdrop-filter:
+    blur(7px);
+
+  -webkit-backdrop-filter:
+    blur(7px);
+
+  transition:
+    background 200ms ease,
+    border-color 200ms ease,
+    transform 200ms ease;
+}
+
+
+.case-study-label strong {
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 14px;
+
+  font-weight: 400;
+
+  color: #f7f2e8;
+}
+
+
+.case-study-label small {
+  font-size: 8px;
+
+  letter-spacing: 0.09em;
+
+  text-transform: uppercase;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      0.52
+    );
+}
+
+
+.case-study-marker.active:hover
+.case-study-label {
+  transform:
+    translateX(3px);
+
+  border-color:
+    rgba(
+      224,
+      180,
+      93,
+      0.48
+    );
+
+  background:
+    rgba(
+      20,
+      22,
+      18,
+      0.88
+    );
+}
+
+
+.case-study-marker.active:hover
+.case-study-dot {
+  background: #f1ca78;
+}
+
+
+/* ============================================================
+   STORY PANEL
+   ============================================================ */
+
+#story-panel {
+  position: fixed;
+
+  left: 0;
+  top: 0;
+  bottom: 0;
+
+  width:
+    min(
+      430px,
+      34vw
+    );
+
+  z-index: 20;
+
+  display: flex;
+
+  align-items: center;
+
+  padding:
+    42px
+    0
+    42px
+    48px;
+
+  pointer-events: none;
+
+  opacity: 1;
+
+  transition:
+    opacity 400ms ease,
+    transform 500ms ease;
+}
+
+
+#story-panel.hidden {
+  opacity: 0;
+
+  transform:
+    translateX(-18px);
+
+  pointer-events: none;
+}
+
+
+.story-panel-inner {
+  width: 100%;
+
+  max-height:
+    calc(
+      100vh - 84px
+    );
+
+  overflow-y: auto;
+
+  padding-right: 28px;
+
+  scrollbar-width: none;
+}
+
+
+.story-panel-inner::-webkit-scrollbar {
+  display: none;
+}
+
+
+/* ============================================================
+   BACK TO ATLAS
+   ============================================================ */
+
+#back-to-atlas {
+  display: inline-flex;
+
+  align-items: center;
+
+  margin:
+    0
+    0
+    28px;
+
+  padding:
+    7px
+    10px;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      0.17
+    );
+
+  background:
+    rgba(
+      15,
+      17,
+      14,
+      0.48
+    );
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      0.68
+    );
+
+  font-size: 9px;
+
+  letter-spacing: 0.12em;
+
+  text-transform: uppercase;
+
+  cursor: pointer;
+
+  pointer-events: auto;
+
+  transition:
+    background 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease;
+}
+
+
+#back-to-atlas:hover {
+  color: #f2d18d;
+
+  border-color:
+    rgba(
+      224,
+      180,
+      93,
+      0.48
+    );
+
+  background:
+    rgba(
+      20,
+      22,
+      18,
+      0.78
+    );
+}
+
+
+/* ============================================================
+   STORY TYPOGRAPHY
+   ============================================================ */
+
+#story-eyebrow {
+  margin-bottom: 12px;
+
+  color: #e0b45d;
+
+  font-size: 10px;
+
+  font-weight: 600;
+
+  letter-spacing: 0.22em;
+
+  text-transform: uppercase;
+}
+
+
+#story-title {
+  margin:
+    0
+    0
+    8px;
+
+  max-width: 390px;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size:
+    clamp(
+      34px,
+      3.2vw,
+      54px
+    );
+
+  font-weight: 400;
+
+  line-height: 0.98;
+
+  letter-spacing: -0.035em;
+
+  color: #f7f2e8;
+}
+
+
+#story-location {
+  margin-top: 14px;
+
+  margin-bottom: 20px;
+
+  font-size: 12px;
+
+  font-weight: 500;
+
+  letter-spacing: 0.12em;
+
+  text-transform: uppercase;
+
+  color:
+    rgba(
+      244,
+      240,
+      230,
+      0.62
+    );
+}
+
+
+#story-text,
+#story-detail {
+  max-width: 370px;
+
+  margin:
+    0
+    0
+    18px;
+
+  font-size: 14px;
+
+  line-height: 1.65;
+
+  color:
+    rgba(
+      246,
+      242,
+      233,
+      0.88
+    );
+}
+
+
+#story-detail {
+  margin-top: 17px;
+
+  color:
+    rgba(
+      246,
+      242,
+      233,
+      0.72
+    );
+}
+
+
+/* ============================================================
+   STORY IMAGES
+   ============================================================ */
+
+#story-media {
+  display: flex;
+
+  gap: 8px;
+
+  width: 100%;
+
+  margin:
+    22px
+    0
+    18px;
+}
+
+
+#story-media:empty {
+  display: none;
+}
+
+
+.story-image {
+  display: block;
+
+  width: 100%;
+
+  max-height: 210px;
+
+  object-fit: cover;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      0.15
+    );
+
+  box-shadow:
+    0
+    12px
+    40px
+    rgba(
+      0,
+      0,
+      0,
+      0.32
+    );
+}
+
+
+.story-image-secondary {
+  width: 38%;
+
+  object-position: center;
+}
+
+
+/* ============================================================
+   STORY PROGRESS
+   ============================================================ */
+
+.story-progress {
+  display: grid;
+
+  grid-template-columns:
+    auto
+    1fr
+    auto;
+
+  align-items: center;
+
+  gap: 10px;
+
+  width: 100%;
+
+  max-width: 370px;
+
+  margin-top: 28px;
+
+  font-size: 9px;
+
+  letter-spacing: 0.12em;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      0.5
+    );
+}
+
+
+.story-progress-line {
+  position: relative;
+
+  height: 1px;
+
+  overflow: hidden;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.22
+    );
+}
+
+
+#story-progress-fill {
+  position: absolute;
+
+  left: 0;
+  top: 0;
+
+  width: 0%;
+  height: 100%;
+
+  background: #dfb35f;
+
+  transition:
+    width 700ms ease;
+}
+
+
+/* ============================================================
+   SCROLL HINT
+   ============================================================ */
+
+#story-scroll-hint {
+  margin-top: 14px;
+
+  font-size: 10px;
+
+  letter-spacing: 0.11em;
+
+  text-transform: uppercase;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      0.46
+    );
+}
+
+
+/* ============================================================
+   STORY TRANSITIONS
+   ============================================================ */
+
+#story-panel.changing {
+  opacity: 0.25;
+
+  transform:
+    translateY(5px);
+}
+
+
+#story-panel.travelling {
+  opacity: 0.66;
+}
+
+
+/* ============================================================
+   LEGEND
+   ============================================================ */
+
+#map-legend {
+  position: fixed;
+
+  right: 28px;
+
+  bottom: 28px;
+
+  z-index: 20;
+
+  min-width: 180px;
+
+  padding:
+    15px
+    17px;
+
+  background:
+    rgba(
+      18,
+      20,
+      16,
+      0.68
+    );
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      0.11
+    );
+
+  backdrop-filter:
+    blur(10px);
+
+  -webkit-backdrop-filter:
+    blur(10px);
+
+  opacity: 0;
+
+  transform:
+    translateY(8px);
+
+  pointer-events: none;
+
+  transition:
+    opacity 400ms ease,
+    transform 400ms ease;
+}
+
+
+#map-legend.visible {
+  opacity: 1;
+
+  transform:
+    translateY(0);
+}
+
+
+.legend-heading {
+  margin-bottom: 12px;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      0.48
+    );
+
+  font-size: 9px;
+
+  font-weight: 600;
+
+  letter-spacing: 0.18em;
+
+  text-transform: uppercase;
+}
+
+
+.legend-item {
+  display: grid;
+
+  grid-template-columns:
+    24px
+    1fr;
+
+  align-items: center;
+
+  gap: 8px;
+
+  min-height: 25px;
+
+  color:
+    rgba(
+      246,
+      242,
+      233,
+      0.82
+    );
+
+  font-size: 11px;
+}
+
+
+.legend-home,
+.legend-destination {
+  color: #f3d47b;
+
+  font-size: 20px;
+
+  line-height: 1;
+}
+
+
+.legend-stop {
+  color: #f2eee4;
+
+  font-size: 13px;
+
+  text-align: center;
+}
+
+
+.legend-route {
+  display: block;
+
+  width: 21px;
+
+  height: 3px;
+
+  border-radius: 20px;
+
+  background: #e8ad4f;
+
+  box-shadow:
+    0
+    0
+    0
+    1px
+    rgba(
+      30,
+      23,
+      16,
+      0.75
+    );
+}
+
+
+/* ============================================================
+   MAPLIBRE CONTROLS
+   ============================================================ */
+
+.maplibregl-ctrl-top-right {
+  top: 16px;
+
+  right: 16px;
+}
+
+
+.maplibregl-ctrl-group {
+  overflow: hidden;
+
+  background:
+    rgba(
+      18,
+      20,
+      16,
+      0.68
+    ) !important;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      0.12
+    );
+
+  box-shadow:
+    none !important;
+
+  backdrop-filter:
+    blur(8px);
+}
+
+
+.maplibregl-ctrl-group button {
+  filter: invert(1);
+
+  opacity: 0.72;
+}
+
+
+.maplibregl-ctrl-attrib {
+  font-size: 9px !important;
+
+  opacity: 0.6;
+}
+
+
+/* ============================================================
+   TABLET
+   ============================================================ */
+
+@media (
+  max-width: 900px
+) {
+
+  .atlas-intro {
+    left: 30px;
+
+    width: 44vw;
+  }
+
+
+  .atlas-intro h1 {
+    font-size: 45px;
+  }
+
+
+  #story-panel {
+    width: 46vw;
+
+    padding-left: 28px;
+  }
+
+
+  #story-title {
+    font-size: 36px;
+  }
+
+
+  #map-legend {
+    right: 18px;
+
+    bottom: 18px;
+  }
+
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (
+  max-width: 650px
+) {
+
+  .atlas-intro {
+    left: 22px;
+
+    right: 22px;
+
+    bottom: 35px;
+
+    top: auto;
+
+    width: auto;
+
+    transform: none;
+  }
+
+
+  .atlas-intro h1 {
+    font-size: 40px;
+  }
+
+
+  .atlas-intro p {
+    font-size: 13px;
+  }
+
+
+  .case-study-label {
+    padding:
+      5px
+      7px;
+  }
+
+
+  .case-study-label strong {
+    font-size: 11px;
+  }
+
+
+  .case-study-label small {
+    display: none;
+  }
+
+
+  #story-panel {
+    top: auto;
+
+    width: 100%;
+
+    height: auto;
+
+    padding:
+      80px
+      22px
+      24px;
+
+    align-items: flex-end;
+
+    background:
+      linear-gradient(
+        0deg,
+        rgba(
+          8,
+          10,
+          8,
+          0.94
+        ),
+        rgba(
+          8,
+          10,
+          8,
+          0
+        )
+      );
+  }
+
+
+  .story-panel-inner {
+    max-height: 48vh;
+  }
+
+
+  #story-title {
+    font-size: 34px;
+  }
+
+
+  #map-legend {
+    display: none;
+  }
+
+
+  body::after {
+    display: none;
+  }
+
+}
