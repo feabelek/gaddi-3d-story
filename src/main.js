@@ -58,6 +58,12 @@ const ROUTE_URL =
 const POINTS_URL =
   '/data/Bharmour_Darcha_RP_WGS84.geojson';
 
+const TEMPLE_URL =
+  '/data/Kartik_Swami_Temple_WGS84.geojson';
+
+const SANCTUARY_URL =
+  '/data/Kugti_WS_WGS84.geojson';
+
 
 const IMAGES = {
 
@@ -70,8 +76,11 @@ const IMAGES = {
   jalsu:
     '/data/images/jalsu_pass.png',
 
-  lambing:
-    '/data/images/lambing.png'
+  temple:
+    '/data/kartik_swami_temple.png',
+
+  darcha:
+    '/data/images/Darcha.jpg'
 
 };
 
@@ -194,7 +203,7 @@ const STORY = [
       'Bharmour',
 
     text:
-      `For Mohanlal, returning to Bharmour is both a pause and
+      `Our journey follows Mohanlal, a shepherd from Bharmour, for whom returning to Bharmour is both a pause and
       a flurry of activity before the long climb to the summer
       pastures. The flock is sheared, supplies are gathered,
       and the animals are prepared for the migration ahead.`,
@@ -252,7 +261,9 @@ const STORY = [
     detail:
       `Mountain passes are more than points on a map. They link
       valleys and grazing grounds, marking the movement from one
-      seasonal landscape into another.`,
+      seasonal landscape into another. Near Kugti, the route also
+      passes a cultural pilgrimage site at Kartik Swami Temple and
+      enters the protected landscape of Kugti Wildlife Sanctuary.`,
 
     center: [
       76.715469,
@@ -267,6 +278,8 @@ const STORY = [
 
     routeProgress: 0.30,
 
+    showKugtiContext: true,
+
     image:
       IMAGES.jalsu,
 
@@ -277,7 +290,60 @@ const STORY = [
 
 
   // ----------------------------------------------------------
-  // 3 — TANDI
+  // 3 — KARTIK SWAMI TEMPLE
+  // ----------------------------------------------------------
+
+  {
+    id: 'kartik-swami-temple',
+
+    eyebrow:
+      'Cultural and Pilgrimage Site',
+
+    title:
+      'A pause along the route',
+
+    location:
+      'Kartik Swami Temple',
+
+    text:
+      `Near Kugti, the migration route passes Kartik Swami
+      Temple, a cultural and pilgrimage site set within the
+      mountain landscape. Its location adds another layer to the
+      journey: the route connects not only grazing grounds and
+      settlements, but places of cultural meaning as well.`,
+
+    detail:
+      `The temple is shown here as a point of cultural context
+      alongside the pastoral route. The nearby Kugti Wildlife
+      Sanctuary marks the protected landscape through which this
+      section of the journey passes.`,
+
+    center: [
+      76.733215,
+      32.478799
+    ],
+
+    zoom: 15.156,
+
+    pitch: 50,
+
+    bearing: 7.99,
+
+    routeProgress: 0.34,
+
+    showKugtiContext: true,
+
+    image:
+      IMAGES.temple,
+
+    secondImage: null,
+
+    showLegend: true
+  },
+
+
+  // ----------------------------------------------------------
+  // 4 — TANDI
   // ----------------------------------------------------------
 
   {
@@ -317,6 +383,8 @@ const STORY = [
 
     routeProgress: 0.72,
 
+    showKugtiContext: true,
+
     image: null,
 
     secondImage: null,
@@ -326,7 +394,7 @@ const STORY = [
 
 
   // ----------------------------------------------------------
-  // 4 — DARCHA
+  // 5 — DARCHA
   // ----------------------------------------------------------
 
   {
@@ -366,8 +434,10 @@ const STORY = [
 
     routeProgress: 1,
 
+    showKugtiContext: true,
+
     image:
-      IMAGES.lambing,
+      IMAGES.darcha,
 
     secondImage: null,
 
@@ -376,7 +446,7 @@ const STORY = [
 
 
   // ----------------------------------------------------------
-  // 5 — FULL ROUTE
+  // 6 — FULL ROUTE
   // ----------------------------------------------------------
 
   {
@@ -409,6 +479,8 @@ const STORY = [
 
     routeProgress: 1,
 
+    showKugtiContext: true,
+
     image: null,
 
     secondImage: null,
@@ -432,6 +504,10 @@ let cameraAnimating = false;
 let storyReady = false;
 
 let scrollLocked = false;
+
+let templeMarker = null;
+
+let sanctuaryLabelMarker = null;
 
 
 // ============================================================
@@ -552,7 +628,7 @@ const map = new maplibregl.Map({
 
 map.setMinZoom(3.5);
 
-map.setMaxZoom(13.5);
+map.setMaxZoom(16);
 
 map.setMaxPitch(68);
 
@@ -568,6 +644,336 @@ map.addControl(
   'top-right'
 
 );
+
+
+// ============================================================
+// CAMERA COMPOSER
+//
+// Development-only tool. Open the app with ?composer=1 to
+// compose and copy refined camera stops without changing the
+// normal public experience.
+// ============================================================
+
+function getCurrentCamera() {
+
+  const center =
+    map.getCenter();
+
+  return {
+    center: [
+      Number(
+        center.lng.toFixed(6)
+      ),
+      Number(
+        center.lat.toFixed(6)
+      )
+    ],
+    zoom: Number(
+      map.getZoom().toFixed(3)
+    ),
+    pitch: Number(
+      map.getPitch().toFixed(2)
+    ),
+    bearing: Number(
+      map.getBearing().toFixed(2)
+    )
+  };
+
+}
+
+
+function formatCamera(camera) {
+
+  return JSON.stringify(
+    camera,
+    null,
+    2
+  );
+
+}
+
+
+function createCameraComposer() {
+
+  const composer =
+    document.createElement('aside');
+
+  composer.id =
+    'camera-composer';
+
+  composer.innerHTML = `
+    <div class="camera-composer-heading">
+      Camera Composer
+      <span>DEV</span>
+    </div>
+
+    <label class="camera-composer-field">
+      <span>Story stop</span>
+      <select id="camera-composer-stop"></select>
+    </label>
+
+    <div class="camera-composer-readout">
+      <code id="camera-composer-output"></code>
+    </div>
+
+    <div class="camera-composer-actions">
+      <button id="camera-composer-target" type="button">Go to stop</button>
+      <button id="camera-composer-capture" type="button">Capture stop</button>
+      <button id="camera-composer-copy" type="button">Copy camera</button>
+      <button id="camera-composer-copy-all" type="button">Copy all</button>
+    </div>
+
+    <div id="camera-composer-status" class="camera-composer-status">
+      Move the map, then copy the refined camera values.
+    </div>
+  `;
+
+  document.body.appendChild(
+    composer
+  );
+
+  const stopSelect =
+    composer.querySelector(
+      '#camera-composer-stop'
+    );
+
+  const output =
+    composer.querySelector(
+      '#camera-composer-output'
+    );
+
+  const status =
+    composer.querySelector(
+      '#camera-composer-status'
+    );
+
+  STORY.forEach(
+    (chapter, index) => {
+
+      const option =
+        document.createElement('option');
+
+      option.value =
+        String(index);
+
+      option.textContent =
+        `${String(index).padStart(2, '0')} · ${chapter.location}`;
+
+      stopSelect.appendChild(
+        option
+      );
+
+    }
+  );
+
+  const selectedChapter = () =>
+    STORY[
+      Number(
+        stopSelect.value
+      )
+    ];
+
+  const updateOutput = () => {
+
+    output.textContent =
+      formatCamera(
+        getCurrentCamera()
+      );
+
+  };
+
+  const setStatus = (
+    message
+  ) => {
+
+    status.textContent =
+      message;
+
+  };
+
+  const copyText = async (
+    text,
+    message
+  ) => {
+
+    try {
+
+      await navigator.clipboard.writeText(
+        text
+      );
+
+      setStatus(
+        message
+      );
+
+    }
+
+    catch (
+      error
+    ) {
+
+      output.textContent =
+        text;
+
+      setStatus(
+        'Clipboard access was blocked. Select and copy the text above.'
+      );
+
+    }
+
+  };
+
+  composer
+    .querySelector(
+      '#camera-composer-target'
+    )
+    .addEventListener(
+      'click',
+      () => {
+
+        const chapter =
+          selectedChapter();
+
+        map.easeTo({
+          center:
+            chapter.center,
+          zoom:
+            chapter.zoom,
+          pitch:
+            chapter.pitch,
+          bearing:
+            chapter.bearing,
+          duration:
+            900
+        });
+
+        setStatus(
+          'Adjust the map, then copy the camera values.'
+        );
+
+      }
+    );
+
+  composer
+    .querySelector(
+      '#camera-composer-capture'
+    )
+    .addEventListener(
+      'click',
+      () => {
+
+        const chapter =
+          selectedChapter();
+
+        const camera =
+          getCurrentCamera();
+
+        chapter.center =
+          camera.center;
+        chapter.zoom =
+          camera.zoom;
+        chapter.pitch =
+          camera.pitch;
+        chapter.bearing =
+          camera.bearing;
+
+        setStatus(
+          `Captured camera for ${chapter.location}. Use “Copy all” to export the refined stops.`
+        );
+
+      }
+    );
+
+  composer
+    .querySelector(
+      '#camera-composer-copy'
+    )
+    .addEventListener(
+      'click',
+      () => {
+
+        const camera =
+          getCurrentCamera();
+
+        copyText(
+          formatCamera(
+            camera
+          ),
+          `Copied camera for ${selectedChapter().location}.`
+        );
+
+      }
+    );
+
+  composer
+    .querySelector(
+      '#camera-composer-copy-all'
+    )
+    .addEventListener(
+      'click',
+      () => {
+
+        const cameras = {};
+
+        STORY.forEach(
+          (chapter) => {
+
+            cameras[
+              chapter.id
+            ] = {
+              center:
+                chapter.center,
+              zoom:
+                chapter.zoom,
+              pitch:
+                chapter.pitch,
+              bearing:
+                chapter.bearing
+            };
+
+          }
+        );
+
+        copyText(
+          formatCamera(
+            cameras
+          ),
+          `Copied ${STORY.length} story cameras.`
+        );
+
+      }
+    );
+
+  stopSelect.addEventListener(
+    'change',
+    () => {
+
+      setStatus(
+        'Use “Go to stop” or move the map to compose a new view.'
+      );
+
+    }
+  );
+
+  map.on(
+    'move',
+    updateOutput
+  );
+
+  updateOutput();
+
+}
+
+
+if (
+  new URLSearchParams(
+    window.location.search
+  ).has('composer')
+) {
+
+  createCameraComposer();
+
+}
 
 
 // ============================================================
@@ -857,6 +1263,30 @@ legend.innerHTML = `
 
     <span>
       Migration route
+    </span>
+
+  </div>
+
+
+  <div class="legend-item">
+
+    <span class="legend-cultural">
+      ✦
+    </span>
+
+    <span>
+      Cultural / pilgrimage site
+    </span>
+
+  </div>
+
+
+  <div class="legend-item">
+
+    <span class="legend-protected"></span>
+
+    <span>
+      Kugti Wildlife Sanctuary
     </span>
 
   </div>
@@ -1160,43 +1590,40 @@ function updateRouteProgress(
 
   const edge =
     Math.min(
-      1,
+      0.999,
       p + 0.001
     );
 
+  const activeGradient =
+    p >= 0.999
+      ? [
+          'interpolate',
+          ['linear'],
+          ['line-progress'],
+          0,
+          '#d89535',
+          1,
+          '#e8ad4f'
+        ]
+      : [
+          'interpolate',
+          ['linear'],
+          ['line-progress'],
+          0,
+          '#d89535',
+          p,
+          '#e8ad4f',
+          edge,
+          'rgba(91, 76, 56, 0)',
+          1,
+          'rgba(91, 76, 56, 0)'
+        ];
+
 
   map.setPaintProperty(
-
     'migration-route',
-
     'line-gradient',
-
-    [
-
-      'interpolate',
-
-      ['linear'],
-
-      ['line-progress'],
-
-
-      0,
-      '#d89535',
-
-
-      p,
-      '#e8ad4f',
-
-
-      edge,
-      'rgba(91, 76, 56, 0.46)',
-
-
-      1,
-      'rgba(91, 76, 56, 0.46)'
-
-    ]
-
+    activeGradient
   );
 
 }
@@ -1221,6 +1648,13 @@ function updateMapVisibility() {
     &&
     currentStoryIndex >= 1;
 
+  const showKugtiContext =
+    !atlasMode
+    &&
+    STORY[
+      currentStoryIndex
+    ].showKugtiContext === true;
+
 
   const visibility =
     showRoute
@@ -1233,7 +1667,12 @@ function updateMapVisibility() {
     'route-points',
     'route-labels',
     'migration-route-casing',
-    'migration-route'
+    'migration-route-base',
+    'migration-route',
+    'kugti-sanctuary-fill',
+    'kugti-sanctuary-outline',
+    'temple-halo',
+    'temple-point'
 
   ]
 
@@ -1260,6 +1699,30 @@ function updateMapVisibility() {
 
       }
     );
+
+
+  if (
+    templeMarker
+  ) {
+
+    templeMarker.getElement().style.display =
+      showKugtiContext
+        ? 'flex'
+        : 'none';
+
+  }
+
+
+  if (
+    sanctuaryLabelMarker
+  ) {
+
+    sanctuaryLabelMarker.getElement().style.display =
+      showKugtiContext
+        ? 'block'
+        : 'none';
+
+  }
 
 
   if (
@@ -1456,7 +1919,7 @@ function getTravelCamera(
   }
 
 
-  // Kugti → Tandi
+  // Kugti → Kartik Swami Temple
 
   if (
     fromIndex === 2
@@ -1467,23 +1930,23 @@ function getTravelCamera(
     return {
 
       zoom:
-        12.0,
+        13.7,
 
       pitch:
-        52,
+        64,
 
       duration1:
-        1100,
+        1200,
 
       duration2:
-        2100
+        1800
 
     };
 
   }
 
 
-  // Tandi → Darcha
+  // Kartik Swami Temple → Tandi
 
   if (
     fromIndex === 3
@@ -1494,16 +1957,16 @@ function getTravelCamera(
     return {
 
       zoom:
-        12.0,
+        12.2,
 
       pitch:
-        48,
+        54,
 
       duration1:
-        1100,
+        1000,
 
       duration2:
-        2100
+        2200
 
     };
 
@@ -2258,10 +2721,6 @@ map.on(
       });
 
 
-      // ======================================================
-      // ROUTE
-      // ======================================================
-
       const routeResponse =
         await fetch(
           ROUTE_URL
@@ -2301,6 +2760,64 @@ map.on(
         }
 
       );
+
+
+      // ======================================================
+      // ROUTE BASE
+      // ======================================================
+
+      map.addLayer({
+
+        id:
+          'migration-route-base',
+
+        type:
+          'line',
+
+        source:
+          'gaddi-route',
+
+        layout: {
+
+          'line-cap':
+            'round',
+
+          'line-join':
+            'round',
+
+          visibility:
+            'none'
+
+        },
+
+        paint: {
+
+          'line-color':
+            'rgba(222, 190, 126, 0.48)',
+
+          'line-width': [
+
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+
+            8,
+            1.2,
+
+            11,
+            2.2,
+
+            14,
+            3.5
+
+          ],
+
+          'line-opacity':
+            0.72
+
+        }
+
+      });
 
 
       // ======================================================
@@ -2398,13 +2915,13 @@ map.on(
             ['zoom'],
 
             8,
-            1.3,
+            1.6,
 
             11,
-            2.4,
+            2.8,
 
             14,
-            4
+            4.5
 
           ],
 
@@ -2423,7 +2940,7 @@ map.on(
             '#e8ad4f',
 
             1,
-            'rgba(91, 76, 56, 0.46)'
+            'rgba(91, 76, 56, 0)'
 
           ]
 
@@ -2686,6 +3203,242 @@ map.on(
         }
 
       });
+
+
+      // ======================================================
+      // CULTURAL AND ECOLOGICAL CONTEXT
+      // ======================================================
+
+      const [
+        templeResponse,
+        sanctuaryResponse
+      ] = await Promise.all([
+
+        fetch(
+          TEMPLE_URL
+        ),
+
+        fetch(
+          SANCTUARY_URL
+        )
+
+      ]);
+
+
+      if (
+        !templeResponse.ok
+        ||
+        !sanctuaryResponse.ok
+      ) {
+
+        throw new Error(
+          'Could not load cultural or ecological context data.'
+        );
+
+      }
+
+
+      const templeGeoJSON =
+        await templeResponse.json();
+
+      const sanctuaryGeoJSON =
+        await sanctuaryResponse.json();
+
+
+      map.addSource(
+        'cultural-site',
+        {
+          type:
+            'geojson',
+          data:
+            templeGeoJSON
+        }
+      );
+
+
+      map.addLayer({
+
+        id:
+          'temple-halo',
+
+        type:
+          'circle',
+
+        source:
+          'cultural-site',
+
+        layout: {
+          visibility:
+            'none'
+        },
+
+        paint: {
+          'circle-radius': 12,
+          'circle-color':
+            'rgba(244, 194, 91, 0.22)',
+          'circle-stroke-width': 1,
+          'circle-stroke-color':
+            'rgba(244, 194, 91, 0.5)'
+        }
+
+      });
+
+
+      map.addLayer({
+
+        id:
+          'temple-point',
+
+        type:
+          'circle',
+
+        source:
+          'cultural-site',
+
+        layout: {
+          visibility:
+            'none'
+        },
+
+        paint: {
+          'circle-radius': 5,
+          'circle-color':
+            '#f4c25b',
+          'circle-stroke-width': 2,
+          'circle-stroke-color':
+            '#2b2117'
+        }
+
+      });
+
+
+      map.addSource(
+        'kugti-sanctuary',
+        {
+          type:
+            'geojson',
+          data:
+            sanctuaryGeoJSON
+        }
+      );
+
+
+      map.addLayer({
+
+        id:
+          'kugti-sanctuary-fill',
+
+        type:
+          'fill',
+
+        source:
+          'kugti-sanctuary',
+
+        layout: {
+          visibility:
+            'none'
+        },
+
+        paint: {
+          'fill-color':
+            '#7c9b72',
+          'fill-opacity':
+            0.18
+        }
+
+      });
+
+
+      map.addLayer({
+
+        id:
+          'kugti-sanctuary-outline',
+
+        type:
+          'line',
+
+        source:
+          'kugti-sanctuary',
+
+        layout: {
+          visibility:
+            'none',
+          'line-cap':
+            'round',
+          'line-join':
+            'round'
+        },
+
+        paint: {
+          'line-color':
+            '#9ab88b',
+          'line-width': 1.5,
+          'line-opacity':
+            0.8,
+          'line-dasharray': [
+            2,
+            1.5
+          ]
+        }
+
+      });
+
+
+      map.moveLayer(
+        'kugti-sanctuary-fill',
+        'migration-route-casing'
+      );
+
+      map.moveLayer(
+        'kugti-sanctuary-outline',
+        'migration-route-casing'
+      );
+
+
+      const templeElement =
+        document.createElement('div');
+
+      templeElement.className =
+        'context-marker temple-marker';
+
+      templeElement.innerHTML = `
+        <span class="context-marker-symbol">✦</span>
+        <span class="context-marker-label">Kartik Swami Temple</span>
+      `;
+
+      templeMarker = new maplibregl.Marker({
+        element:
+          templeElement,
+        anchor:
+          'bottom-left'
+      })
+        .setLngLat([
+          76.73414143160518,
+          32.4793322013462
+        ])
+        .addTo(map);
+
+
+      const sanctuaryLabelElement =
+        document.createElement('div');
+
+      sanctuaryLabelElement.className =
+        'context-marker sanctuary-label-marker';
+
+      sanctuaryLabelElement.textContent =
+        'Kugti Wildlife Sanctuary';
+
+      sanctuaryLabelMarker = new maplibregl.Marker({
+        element:
+          sanctuaryLabelElement,
+        anchor:
+          'center'
+      })
+        .setLngLat([
+          76.72,
+          32.42
+        ])
+        .addTo(map);
 
 
       // ======================================================
