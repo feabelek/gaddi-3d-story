@@ -750,6 +750,8 @@ body::after {
 
   line-height: 1.65;
 
+  text-align: justify;
+
   color:
     rgba(
       246,
@@ -1052,11 +1054,31 @@ body::after {
 }
 
 
+.legend-item > :first-child {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 24px;
+  height: 24px;
+}
+
+
 .legend-home,
 .legend-destination {
   color: #f3d47b;
 
   font-size: 20px;
+
+  line-height: 1;
+}
+
+
+.legend-shearing {
+  color: #f0b86b;
+
+  font-size: 17px;
 
   line-height: 1;
 }
@@ -1074,25 +1096,38 @@ body::after {
 .legend-route {
   display: block;
 
-  width: 21px;
+  position: relative;
 
+  justify-self: center;
+
+  width: 24px;
+
+  height: 24px;
+
+  border-radius: 20px;
+
+  background: transparent;
+
+  box-shadow: none;
+}
+
+
+.legend-route::before {
+  content: "";
+
+  position: absolute;
+
+  top: 50%;
+  left: 0;
+
+  width: 24px;
   height: 3px;
+
+  transform: translateY(-50%);
 
   border-radius: 20px;
 
   background: #e8ad4f;
-
-  box-shadow:
-    0
-    0
-    0
-    1px
-    rgba(
-      30,
-      23,
-      16,
-      0.75
-    );
 }
 
 
@@ -1122,6 +1157,117 @@ body::after {
 /* ============================================================
    MAP CONTEXT MARKERS
    ============================================================ */
+
+.flock-marker {
+  position: relative;
+
+  width: 76px;
+  height: 48px;
+
+  pointer-events: none;
+  transform: translateY(-8px);
+}
+
+
+.flock-sheep {
+  position: absolute;
+
+  display: block;
+
+  width: 17px;
+  height: 12px;
+
+  border: 1px solid rgba(42, 31, 19, 0.7);
+  border-radius: 55% 50% 45% 48%;
+
+  background: #f5ead0;
+  box-shadow: 0 2px 5px rgba(14, 12, 8, 0.42);
+
+  animation: flockStep 1.8s ease-in-out infinite;
+}
+
+
+.flock-sheep::before {
+  content: "";
+
+  position: absolute;
+  right: -5px;
+  top: 2px;
+
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+  background: #3c3024;
+}
+
+
+.flock-sheep::after {
+  content: "";
+
+  position: absolute;
+  left: 3px;
+  bottom: -4px;
+
+  width: 2px;
+  height: 4px;
+
+  background: #3c3024;
+  box-shadow: 7px 0 #3c3024;
+}
+
+
+.flock-sheep-back {
+  left: 8px;
+  top: 23px;
+  transform: scale(0.72);
+  animation-delay: -0.5s;
+}
+
+
+.flock-sheep-middle {
+  left: 24px;
+  top: 15px;
+  transform: scale(0.88);
+  animation-delay: -0.25s;
+}
+
+
+.flock-sheep-front {
+  left: 40px;
+  top: 22px;
+}
+
+
+@keyframes flockStep {
+  0%,
+  100% {
+    margin-top: 0;
+  }
+
+  50% {
+    margin-top: -2px;
+  }
+}
+
+
+@media (max-width: 650px) {
+
+  .flock-marker {
+    transform: translateY(-5px) scale(0.82);
+    transform-origin: center bottom;
+  }
+
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+
+  .flock-sheep {
+    animation: none;
+  }
+
+}
 
 .context-marker {
   display: flex;

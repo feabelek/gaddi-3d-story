@@ -58,6 +58,12 @@ const ROUTE_URL =
 const POINTS_URL =
   '/data/Bharmour_Darcha_RP_WGS84.geojson';
 
+const SHEARING_URL =
+  '/data/Shearing_Locations.geojson';
+
+const RIVERS_URL =
+  '/data/HP_Rivers.geojson';
+
 const TEMPLE_URL =
   '/data/Kartik_Swami_Temple_WGS84.geojson';
 
@@ -83,6 +89,156 @@ const IMAGES = {
     '/data/images/Darcha.jpg'
 
 };
+
+
+function utm43ToWgs84(
+  easting,
+  northing
+) {
+
+  const semiMajorAxis = 6378137;
+  const eccentricitySquared = 0.00669438;
+  const scaleFactor = 0.9996;
+  const falseEasting = 500000;
+  const falseNorthing = 0;
+  const centralMeridian = 75;
+
+  const eccentricityPrimeSquared =
+    eccentricitySquared
+    / (
+      1
+      - eccentricitySquared
+    );
+
+  const meridionalArc =
+    (northing - falseNorthing)
+    / scaleFactor;
+
+  const mu =
+    meridionalArc
+    / (
+      semiMajorAxis
+      * (
+        1
+        - eccentricitySquared / 4
+        - 3 * eccentricitySquared ** 2 / 64
+        - 5 * eccentricitySquared ** 3 / 256
+      )
+    );
+
+  const eccentricityOne =
+    (
+      1
+      - Math.sqrt(
+        1
+        - eccentricitySquared
+      )
+    )
+    / (
+      1
+      + Math.sqrt(
+        1
+        - eccentricitySquared
+      )
+    );
+
+  const footpointLatitude =
+    mu
+    + (
+      3 * eccentricityOne / 2
+      - 27 * eccentricityOne ** 3 / 32
+    )
+    * Math.sin(2 * mu)
+    + (
+      21 * eccentricityOne ** 2 / 16
+      - 55 * eccentricityOne ** 4 / 32
+    )
+    * Math.sin(4 * mu)
+    + 151 * eccentricityOne ** 3 / 96
+    * Math.sin(6 * mu)
+    + 1097 * eccentricityOne ** 4 / 512
+    * Math.sin(8 * mu);
+
+  const radiusOfCurvature =
+    semiMajorAxis
+    / Math.sqrt(
+      1
+      - eccentricitySquared
+      * Math.sin(footpointLatitude) ** 2
+    );
+
+  const tangentSquared =
+    Math.tan(footpointLatitude) ** 2;
+
+  const curvatureRatio =
+    eccentricityPrimeSquared
+    * Math.cos(footpointLatitude) ** 2;
+
+  const distanceFromMeridian =
+    (easting - falseEasting)
+    / (
+      radiusOfCurvature
+      * scaleFactor
+    );
+
+  const latitude =
+    footpointLatitude
+    - (
+      radiusOfCurvature
+      * Math.tan(footpointLatitude)
+      / semiMajorAxis
+    )
+    * (
+      distanceFromMeridian ** 2 / 2
+      - (
+        5
+        + 3 * tangentSquared
+        + 10 * curvatureRatio
+        - 4 * curvatureRatio ** 2
+        - 9 * eccentricityPrimeSquared
+      )
+      * distanceFromMeridian ** 4 / 24
+      + (
+        61
+        + 90 * tangentSquared
+        + 298 * curvatureRatio
+        + 45 * tangentSquared ** 2
+        - 252 * eccentricityPrimeSquared
+        - 3 * curvatureRatio ** 2
+      )
+      * distanceFromMeridian ** 6 / 720
+    );
+
+  const longitude =
+    centralMeridian
+    + (
+      distanceFromMeridian
+      - (
+        1
+        + 2 * tangentSquared
+        + curvatureRatio
+      )
+      * distanceFromMeridian ** 3 / 6
+      + (
+        5
+        - 2 * curvatureRatio
+        + 28 * tangentSquared
+        - 3 * curvatureRatio ** 2
+        + 8 * eccentricityPrimeSquared
+        + 24 * tangentSquared ** 2
+      )
+      * distanceFromMeridian ** 5 / 120
+    )
+    / Math.cos(footpointLatitude)
+    * 180
+    / Math.PI;
+
+  return [
+    longitude,
+    latitude * 180 / Math.PI
+  ];
+
+}
 
 
 // ============================================================
@@ -162,10 +318,10 @@ const STORY = [
       'Himachal Pradesh',
 
     text:
-      `The Gaddi are a traditional agro-pastoralist community
-      who rear sheep and goats. During summer, their flocks move
-      toward high-altitude pastures. In winter, they descend
-      toward the lower hills and plains.`,
+      `The Gaddi are a traditional agro-pastoralist community 
+      whose life revolves around rearing sheep and goats in the Western Himalaya. 
+      During summer, they move their flocks to high-altitude pastures while in winter, 
+      they descend toward the lower hills and plains. `,
 
     center: [
       77.15,
@@ -226,6 +382,11 @@ const STORY = [
 
     routeProgress: 0.035,
 
+    routeStop: [
+      76.5326151804133,
+      32.4444683599394
+    ],
+
     image:
       IMAGES.bharmour,
 
@@ -278,6 +439,11 @@ const STORY = [
 
     routeProgress: 0.30,
 
+    routeStop: [
+      76.70291390105247,
+      32.46933363515453
+    ],
+
     showKugtiContext: true,
 
     image:
@@ -297,7 +463,7 @@ const STORY = [
     id: 'kartik-swami-temple',
 
     eyebrow:
-      'Cultural and Pilgrimage Site',
+      'Cultural Site',
 
     title:
       'A pause along the route',
@@ -306,17 +472,14 @@ const STORY = [
       'Kartik Swami Temple',
 
     text:
-      `Near Kugti, the migration route passes Kartik Swami
-      Temple, a cultural and pilgrimage site set within the
-      mountain landscape. Its location adds another layer to the
-      journey: the route connects not only grazing grounds and
-      settlements, but places of cultural meaning as well.`,
+      `Along Mohanlal’s route, the Kartik Swami Temple stands as both a spiritual stop and a cultural anchor.
+      Here, animal sacrifices, prayers, and seasonal festivals 
+      like Lohri ki Sankranti and Veeru ki Sankranti mark an important moment in the 
+      pastoralists’ annual migration cycle.
+.`,
 
     detail:
-      `The temple is shown here as a point of cultural context
-      alongside the pastoral route. The nearby Kugti Wildlife
-      Sanctuary marks the protected landscape through which this
-      section of the journey passes.`,
+      ``,
 
     center: [
       76.733215,
@@ -330,6 +493,11 @@ const STORY = [
     bearing: 7.99,
 
     routeProgress: 0.34,
+
+    routeStop: [
+      76.73502,
+      32.47985
+    ],
 
     showKugtiContext: true,
 
@@ -365,23 +533,28 @@ const STORY = [
       stunted blue pines and low shrubs across the slopes.`,
 
     detail:
-      `At Tandi, the Chandra and Bhaga rivers meet to form the
-      Chenab. The gentler slopes give the flock a chance to
-      rest and graze before the final journey into the higher
-      summer pastures.`,
+      `Tandi, at the confluence of the Chandra and Bhaga rivers forming the Chenab, 
+      has historically been an important tri-junction on the migration route connecting Leh, Killar, and Kaza. 
+      The gentle slopes here give Mohanlal and his flock a chance to rest and graze before the final journey into the higher summer pastures
+    `,
 
     center: [
       76.983644,
       32.557597
     ],
 
-    zoom: 13.5,
+    zoom: 13.2,
 
-    pitch: 54.5,
+    pitch: 50,
 
     bearing: 74.76,
 
     routeProgress: 0.72,
+
+    routeStop: [
+      76.98164016179844,
+      32.55070214186458
+    ],
 
     showKugtiContext: true,
 
@@ -434,6 +607,11 @@ const STORY = [
 
     routeProgress: 1,
 
+    routeStop: [
+      77.19755939568283,
+      32.67493238488826
+    ],
+
     showKugtiContext: true,
 
     image:
@@ -462,20 +640,26 @@ const STORY = [
       'Bharmour → Darcha',
 
     text:
-      `The summer migration connects home, mountain passes,
-      grazing grounds and changing ecological zones across the
-      Western Himalaya.`,
+      `After the summer grazing, Mohanlal begins his journey back to the home village and then to the winter pastures, 
+      moving through the high and low elevations during September and October to complete his annual cycle. 
+      Viewing the full route highlights how a single community’s migration shapes its entire way of life.`, 
+      
+    detail:
+    `For the Gaddi pastoralists, transhumance is a living connection between people, animals, 
+      landscapes, and traditions. Through their seasonal movements, shepherds sustain local economies, 
+      maintain cultural heritage, and care for fragile mountain ecosystems.
+ `,
 
     center: [
-      76.924699,
-      32.532357
+      76.958654,
+      32.531085
     ],
 
-    zoom: 10.467,
+    zoom: 10.411,
 
-    pitch: 44.49,
+    pitch: 29.5,
 
-    bearing: -57.03,
+    bearing: -60.86,
 
     routeProgress: 1,
 
@@ -508,6 +692,87 @@ let scrollLocked = false;
 let templeMarker = null;
 
 let sanctuaryLabelMarker = null;
+
+let flockMarker = null;
+
+let routeCoordinates = [];
+
+let routeDistances = [];
+
+let routeLength = 0;
+
+let flockProgress = 0;
+
+let flockAnimationFrame = null;
+
+const FLOCK_START_PROGRESS =
+  0.003;
+
+let riverAnimationFrame = null;
+
+
+const TANDI_RIVER_BOUNDS = [
+  76.82,
+  32.42,
+  77.15,
+  32.70
+];
+
+
+function coordinatesTouchBounds(
+  coordinates,
+  bounds
+) {
+
+  if (
+    typeof coordinates[0] ===
+    'number'
+  ) {
+
+    return (
+      coordinates[0] >= bounds[0]
+      && coordinates[0] <= bounds[2]
+      && coordinates[1] >= bounds[1]
+      && coordinates[1] <= bounds[3]
+    );
+
+  }
+
+  return coordinates.some(
+    (child) =>
+      coordinatesTouchBounds(
+        child,
+        bounds
+      )
+  );
+
+}
+
+
+function stripRiverElevation(
+  coordinates
+) {
+
+  if (
+    typeof coordinates[0] ===
+    'number'
+  ) {
+
+    return [
+      coordinates[0],
+      coordinates[1]
+    ];
+
+  }
+
+  return coordinates.map(
+    (child) =>
+      stripRiverElevation(
+        child
+      )
+  );
+
+}
 
 
 // ============================================================
@@ -993,7 +1258,7 @@ atlasHome.innerHTML = `
   <div class="atlas-intro">
 
     <div class="atlas-kicker">
-      Pastoralism Atlas
+      An Atlas of Indian Pastoralism
     </div>
 
     <h1>
@@ -1225,7 +1490,20 @@ legend.innerHTML = `
     </span>
 
     <span>
-      Home village
+      Home Village
+    </span>
+
+  </div>
+
+
+  <div class="legend-item">
+
+    <span class="legend-shearing">
+      ✂
+    </span>
+
+    <span>
+      Shearing Location
     </span>
 
   </div>
@@ -1238,7 +1516,7 @@ legend.innerHTML = `
     </span>
 
     <span>
-      Route stop
+      Route points
     </span>
 
   </div>
@@ -1251,7 +1529,7 @@ legend.innerHTML = `
     </span>
 
     <span>
-      Summer grazing grounds
+      Summer Grazing Grounds
     </span>
 
   </div>
@@ -1262,7 +1540,7 @@ legend.innerHTML = `
     <span class="legend-route"></span>
 
     <span>
-      Migration route
+      Migration Route
     </span>
 
   </div>
@@ -1275,7 +1553,7 @@ legend.innerHTML = `
     </span>
 
     <span>
-      Cultural / pilgrimage site
+      Cultural Site
     </span>
 
   </div>
@@ -1563,8 +1841,70 @@ function updateStoryPanel() {
 // ROUTE PROGRESS
 // ============================================================
 
-function updateRouteProgress(
+function setRouteProgressPaint(
   progress
+) {
+
+  const visibleProgress =
+    Math.max(
+      FLOCK_START_PROGRESS,
+      progress
+    );
+
+  const edge = Math.min(
+    0.999,
+    visibleProgress + 0.001
+  );
+
+  const gradient = visibleProgress >= 0.999
+    ? [
+        'interpolate',
+        ['linear'],
+        ['line-progress'],
+        0,
+        '#d89535',
+        1,
+        '#e8ad4f'
+      ]
+    : [
+        'interpolate',
+        ['linear'],
+        ['line-progress'],
+        0,
+        '#d89535',
+            visibleProgress,
+        '#e8ad4f',
+        edge,
+        'rgba(91, 76, 56, 0)',
+        1,
+        'rgba(91, 76, 56, 0)'
+      ];
+
+  map.setPaintProperty(
+    'migration-route',
+    'line-gradient',
+    gradient
+  );
+
+  if (
+    map.getLayer(
+      'migration-route-highlight'
+    )
+  ) {
+
+    map.setPaintProperty(
+      'migration-route-highlight',
+      'line-gradient',
+      gradient
+    );
+
+  }
+
+}
+
+function updateRouteProgress(
+  progress,
+  options = {}
 ) {
 
   if (
@@ -1586,6 +1926,51 @@ function updateRouteProgress(
         progress
       )
     );
+
+  if (
+    flockAnimationFrame
+  ) {
+
+    cancelAnimationFrame(flockAnimationFrame);
+    flockAnimationFrame = null;
+
+  }
+
+  const startProgress = flockProgress;
+
+  if (
+    options.animate !== false
+    && Math.abs(p - startProgress) > 0.01
+  ) {
+
+    const startedAt = performance.now();
+    const duration = options.duration
+      || Math.min(
+        1800,
+        Math.max(700, Math.abs(p - startProgress) * 2600)
+      );
+
+    const animateFlock = (now) => {
+      const elapsed = Math.min(1, (now - startedAt) / duration);
+      const eased = elapsed * elapsed * (3 - 2 * elapsed);
+      const value = startProgress + (p - startProgress) * eased;
+
+      setRouteProgressPaint(value);
+      flockProgress = value;
+      updateFlockPosition(value);
+
+      if (elapsed < 1) {
+        flockAnimationFrame = requestAnimationFrame(animateFlock);
+      }
+      else {
+        flockAnimationFrame = null;
+      }
+    };
+
+    flockAnimationFrame = requestAnimationFrame(animateFlock);
+    return;
+
+  }
 
 
   const edge =
@@ -1626,6 +2011,269 @@ function updateRouteProgress(
     activeGradient
   );
 
+  if (
+    map.getLayer(
+      'migration-route-highlight'
+    )
+  ) {
+
+    const highlightGradient =
+      p >= 0.999
+        ? [
+            'interpolate',
+            ['linear'],
+            ['line-progress'],
+            0,
+            'rgba(255, 238, 181, 0.78)',
+            1,
+            'rgba(255, 238, 181, 0.42)'
+          ]
+        : [
+            'interpolate',
+            ['linear'],
+            ['line-progress'],
+            0,
+            'rgba(255, 238, 181, 0.78)',
+            p,
+            'rgba(255, 238, 181, 0.42)',
+            edge,
+            'rgba(255, 238, 181, 0)',
+            1,
+            'rgba(255, 238, 181, 0)'
+          ];
+
+    map.setPaintProperty(
+      'migration-route-highlight',
+      'line-gradient',
+      highlightGradient
+    );
+
+  }
+
+  flockProgress = p;
+  updateFlockPosition(p);
+
+}
+
+
+function getRouteCoordinate(
+  progress
+) {
+
+  if (
+    routeCoordinates.length < 2
+    || routeLength === 0
+  ) {
+
+    return null;
+
+  }
+
+  const targetDistance = Math.max(
+    0,
+    Math.min(1, progress)
+  ) * routeLength;
+
+  let segment = 1;
+
+  while (
+    segment < routeDistances.length - 1
+    && routeDistances[segment] < targetDistance
+  ) {
+
+    segment += 1;
+
+  }
+
+  const previousDistance = routeDistances[segment - 1];
+  const segmentDistance = routeDistances[segment] - previousDistance;
+  const ratio = segmentDistance === 0
+    ? 0
+    : (targetDistance - previousDistance) / segmentDistance;
+  const previous = routeCoordinates[segment - 1];
+  const current = routeCoordinates[segment];
+
+  return [
+    previous[0] + (current[0] - previous[0]) * ratio,
+    previous[1] + (current[1] - previous[1]) * ratio
+  ];
+
+}
+
+
+function getRouteProgressForCoordinate(
+  coordinate
+) {
+
+  if (
+    routeCoordinates.length < 2
+    || routeLength === 0
+    || !coordinate
+  ) {
+
+    return null;
+
+  }
+
+  let closestDistance = Infinity;
+  let closestProgress = 0;
+
+  for (
+    let index = 1;
+    index < routeCoordinates.length;
+    index += 1
+  ) {
+
+    const start = routeCoordinates[index - 1];
+    const end = routeCoordinates[index];
+    const latitudeScale = Math.cos(coordinate[1] * Math.PI / 180);
+    const segmentX = (end[0] - start[0]) * latitudeScale;
+    const segmentY = end[1] - start[1];
+    const pointX = (coordinate[0] - start[0]) * latitudeScale;
+    const pointY = coordinate[1] - start[1];
+    const segmentLengthSquared = segmentX * segmentX + segmentY * segmentY;
+    const ratio = segmentLengthSquared === 0
+      ? 0
+      : Math.max(
+          0,
+          Math.min(
+            1,
+            (pointX * segmentX + pointY * segmentY) / segmentLengthSquared
+          )
+        );
+    const distanceX = pointX - segmentX * ratio;
+    const distanceY = pointY - segmentY * ratio;
+    const distance = distanceX * distanceX + distanceY * distanceY;
+
+    if (
+      distance < closestDistance
+    ) {
+
+      closestDistance = distance;
+      closestProgress = (
+        routeDistances[index - 1]
+        + (routeDistances[index] - routeDistances[index - 1]) * ratio
+      ) / routeLength;
+
+    }
+
+  }
+
+  return closestProgress;
+
+}
+
+
+function getStoryRouteProgress(
+  chapter
+) {
+
+  return getRouteProgressForCoordinate(
+    chapter.routeStop
+  )
+  ?? chapter.routeProgress;
+
+}
+
+
+function updateFlockPosition(
+  progress
+) {
+
+  if (
+    !flockMarker
+  ) {
+
+    return;
+
+  }
+
+  const flockProgress =
+    Math.max(
+      FLOCK_START_PROGRESS,
+      progress
+    );
+
+  const coordinate =
+    getRouteCoordinate(
+      flockProgress
+    );
+
+  if (
+    coordinate
+  ) {
+
+    flockMarker.setOffset(
+      [
+        0,
+        0
+      ]
+    );
+
+    flockMarker.setLngLat(coordinate);
+
+  }
+
+}
+
+
+function prepareRouteCoordinates(
+  routeGeoJSON
+) {
+
+  const lines = [];
+
+  routeGeoJSON.features.forEach(
+    (feature) => {
+
+      if (
+        feature.geometry.type === 'LineString'
+      ) {
+
+        lines.push(feature.geometry.coordinates);
+
+      }
+
+      if (
+        feature.geometry.type === 'MultiLineString'
+      ) {
+
+        lines.push(...feature.geometry.coordinates);
+
+      }
+
+    }
+  );
+
+  routeCoordinates = lines
+    .sort((a, b) => b.length - a.length)[0]
+    || [];
+
+  routeDistances = [0];
+  routeLength = 0;
+
+  for (
+    let index = 1;
+    index < routeCoordinates.length;
+    index += 1
+  ) {
+
+    const previous = routeCoordinates[index - 1];
+    const current = routeCoordinates[index];
+    const longitudeDistance = (current[0] - previous[0]) * Math.cos(
+      ((current[1] + previous[1]) / 2) * Math.PI / 180
+    );
+    const latitudeDistance = current[1] - previous[1];
+
+    routeLength += Math.sqrt(
+      longitudeDistance * longitudeDistance
+      + latitudeDistance * latitudeDistance
+    );
+
+    routeDistances.push(routeLength);
+
+  }
+
 }
 
 
@@ -1655,6 +2303,14 @@ function updateMapVisibility() {
       currentStoryIndex
     ].showKugtiContext === true;
 
+  const showTandiRiver =
+    !atlasMode
+    &&
+    STORY[
+      currentStoryIndex
+    ].id ===
+    'tandi';
+
 
   const visibility =
     showRoute
@@ -1669,10 +2325,13 @@ function updateMapVisibility() {
     'migration-route-casing',
     'migration-route-base',
     'migration-route',
+    'migration-route-highlight',
+    'shearing-location',
     'kugti-sanctuary-fill',
     'kugti-sanctuary-outline',
-    'temple-halo',
-    'temple-point'
+    'tandi-river-shadow',
+    'tandi-river-water',
+    'tandi-river-flow'
 
   ]
 
@@ -1725,17 +2384,59 @@ function updateMapVisibility() {
   }
 
 
+  [
+    'tandi-river-shadow',
+    'tandi-river-water',
+    'tandi-river-flow'
+  ].forEach(
+    (layerId) => {
+
+      if (
+        map.getLayer(layerId)
+      ) {
+
+        map.setPaintProperty(
+          layerId,
+          'line-opacity',
+          showTandiRiver
+            ? layerId === 'tandi-river-shadow'
+              ? 0.9
+              : layerId === 'tandi-river-water'
+                ? 0.88
+                : 0.9
+            : 0
+        );
+
+      }
+
+    }
+  );
+
+
+  if (
+    flockMarker
+  ) {
+
+    flockMarker.getElement().style.display = showRoute
+      ? 'block'
+      : 'none';
+
+  }
+
+
   if (
     showRoute
   ) {
 
-    updateRouteProgress(
+      updateRouteProgress(
 
-      STORY[
-        currentStoryIndex
-      ].routeProgress
+        getStoryRouteProgress(
+          STORY[
+            currentStoryIndex
+          ]
+        )
 
-    );
+      );
 
   }
 
@@ -1876,7 +2577,7 @@ async function simpleCameraMove(
 
     easing:
       (t) =>
-        t * t * (3 - 2 * t)
+        t * t * t * (t * (t * 6 - 15) + 10)
 
   });
 
@@ -1957,10 +2658,10 @@ function getTravelCamera(
     return {
 
       zoom:
-        12.2,
+        13.2,
 
       pitch:
-        54,
+        60,
 
       duration1:
         1000,
@@ -2001,157 +2702,156 @@ async function migrationCameraMove(
   toIndex
 ) {
 
-  const destination =
-    STORY[
-      toIndex
-    ];
+  const destination = STORY[toIndex];
+  const travel = getTravelCamera(fromIndex, toIndex);
 
+  if (
+    false
+  ) {
 
-  const mapCenter =
-    map.getCenter();
+    const startCenter =
+      map.getCenter().toArray();
 
+    const startZoom =
+      map.getZoom();
 
-  const start = {
+    const startPitch =
+      map.getPitch();
 
-    center: [
+    const startBearing =
+      map.getBearing();
 
-      mapCenter.lng,
-      mapCenter.lat
+    const duration =
+      travel.duration1
+      + travel.duration2;
 
-    ],
+    await new Promise(
+      (resolve) => {
 
-    zoom:
-      map.getZoom(),
+        const startedAt =
+          performance.now();
 
-    pitch:
-      map.getPitch(),
+        const animateCamera =
+          (now) => {
 
-    bearing:
-      map.getBearing()
+            const rawProgress =
+              Math.min(
+                1,
+                (now - startedAt)
+                / duration
+              );
 
-  };
+            const easedProgress =
+              rawProgress
+              * rawProgress
+              * (3 - 2 * rawProgress);
 
+            const finalCenter = [
+              startCenter[0]
+              + (
+                destination.center[0]
+                - startCenter[0]
+              )
+              * easedProgress,
+              startCenter[1]
+              + (
+                destination.center[1]
+                - startCenter[1]
+              )
+              * easedProgress
+            ];
 
-  const travel =
-    getTravelCamera(
-      fromIndex,
-      toIndex
+            const liftProgress =
+              Math.min(
+                1,
+                rawProgress / 0.35
+              );
+
+            const finalProgress =
+              Math.max(
+                0,
+                (rawProgress - 0.72)
+                / 0.28
+              );
+
+            const pitch =
+              startPitch
+              + (
+                travel.pitch
+                - startPitch
+              )
+              * liftProgress
+              + (
+                destination.pitch
+                - travel.pitch
+              )
+              * finalProgress;
+
+            const zoom =
+              startZoom
+              + (
+                travel.zoom
+                - startZoom
+              )
+              * liftProgress
+              + (
+                destination.zoom
+                - travel.zoom
+              )
+              * finalProgress;
+
+            const bearing =
+              startBearing
+              + (
+                destination.bearing
+                - startBearing
+              )
+              * easedProgress;
+
+            map.jumpTo({
+              center:
+                finalCenter,
+              zoom,
+              pitch,
+              bearing
+            });
+
+            if (
+              rawProgress < 1
+            ) {
+
+              requestAnimationFrame(
+                animateCamera
+              );
+
+            }
+            else {
+
+              resolve();
+
+            }
+
+          };
+
+        requestAnimationFrame(
+          animateCamera
+        );
+
+      }
     );
 
-
-  const travelProgress =
-    0.42;
-
-
-  const travelCenter = [
-
-    start.center[0]
-    +
-    (
-      destination.center[0]
-      -
-      start.center[0]
-    )
-    *
-    travelProgress,
-
-
-    start.center[1]
-    +
-    (
-      destination.center[1]
-      -
-      start.center[1]
-    )
-    *
-    travelProgress
-
-  ];
-
-
-  let bearingDifference =
-    destination.bearing
-    -
-    start.bearing;
-
-
-  while (
-    bearingDifference > 180
-  ) {
-
-    bearingDifference -=
-      360;
+    return;
 
   }
 
-
-  while (
-    bearingDifference < -180
-  ) {
-
-    bearingDifference +=
-      360;
-
-  }
-
-
-  const travelBearing =
-    start.bearing
-    +
-    bearingDifference
-    *
-    0.45;
-
-
-  // First part.
-
   await easeCamera({
-
-    center:
-      travelCenter,
-
-    zoom:
-      travel.zoom,
-
-    pitch:
-      travel.pitch,
-
-    bearing:
-      travelBearing,
-
-    duration:
-      travel.duration1,
-
-    easing:
-      (t) =>
-        t * t * (3 - 2 * t)
-
-  });
-
-
-  // Arrival.
-
-  await easeCamera({
-
-    center:
-      destination.center,
-
-    zoom:
-      destination.zoom,
-
-    pitch:
-      destination.pitch,
-
-    bearing:
-      destination.bearing,
-
-    duration:
-      travel.duration2,
-
-    easing:
-      (t) =>
-        t * t * (3 - 2 * t)
-
+    center: destination.center,
+    zoom: destination.zoom,
+    pitch: destination.pitch,
+    bearing: destination.bearing,
+    duration: travel.duration1 + travel.duration2,
+    easing: (t) =>
+      t * t * t * (t * (t * 6 - 15) + 10)
   });
 
 }
@@ -2214,6 +2914,9 @@ async function enterHimachalCaseStudy() {
 
     currentStoryIndex =
       0;
+
+    flockProgress = 0;
+    updateFlockPosition(0);
 
 
     // India → Himachal.
@@ -2370,6 +3073,9 @@ async function returnToAtlas() {
     currentStoryIndex =
       0;
 
+    flockProgress = 0;
+    updateFlockPosition(0);
+
 
     updateMapVisibility();
 
@@ -2476,6 +3182,82 @@ async function goToChapter(
 
   scrollHint.textContent =
     'Following the journey…';
+
+  const transitionDuration =
+    previousIndex === 0
+    || destinationIndex === 0
+      ? 3300
+      : destination.id === 'full-route'
+        ? 3000
+        : (() => {
+            const travel = getTravelCamera(
+              previousIndex,
+              destinationIndex
+            );
+
+            return travel.duration1 + travel.duration2;
+          })();
+
+  if (
+    flockMarker
+  ) {
+
+    flockMarker.getElement().style.display = destinationIndex >= 1
+      ? 'block'
+      : 'none';
+
+  }
+
+  if (
+    destinationIndex >= 1
+  ) {
+
+    [
+      'route-points',
+      'route-labels',
+      'migration-route-casing',
+      'migration-route-base',
+      'migration-route',
+    'migration-route-highlight',
+    'shearing-location',
+    'kugti-sanctuary-fill',
+    'kugti-sanctuary-outline'
+    ].forEach(
+      (layerId) => {
+
+        if (
+          map.getLayer(layerId)
+        ) {
+
+          map.setLayoutProperty(
+            layerId,
+            'visibility',
+            'visible'
+          );
+
+        }
+
+      }
+    );
+
+    updateRouteProgress(
+      getStoryRouteProgress(destination),
+      {
+        duration: transitionDuration
+      }
+    );
+
+  }
+  else {
+
+    updateRouteProgress(
+      0,
+      {
+        duration: transitionDuration
+      }
+    );
+
+  }
 
 
   try {
@@ -2741,6 +3523,10 @@ map.on(
       const routeGeoJSON =
         await routeResponse.json();
 
+      prepareRouteCoordinates(
+        routeGeoJSON
+      );
+
 
       map.addSource(
 
@@ -2818,6 +3604,33 @@ map.on(
         }
 
       });
+
+
+      const flockElement = document.createElement('div');
+
+      flockElement.className = 'flock-marker';
+      flockElement.setAttribute('role', 'img');
+      flockElement.setAttribute(
+        'aria-label',
+        'The moving flock on the Gaddi migration route'
+      );
+      flockElement.innerHTML = `
+        <span class="flock-sheep flock-sheep-back" aria-hidden="true"></span>
+        <span class="flock-sheep flock-sheep-middle" aria-hidden="true"></span>
+        <span class="flock-sheep flock-sheep-front" aria-hidden="true"></span>
+      `;
+
+      flockMarker = new maplibregl.Marker({
+        element: flockElement,
+        anchor: 'center'
+      })
+        .setLngLat(
+          getRouteCoordinate(0)
+          || STORY[1].center
+        )
+        .addTo(map);
+
+      flockMarker.getElement().style.display = 'none';
 
 
       // ======================================================
@@ -2950,8 +3763,318 @@ map.on(
 
 
       // ======================================================
+      // ROUTE HIGHLIGHT
+      // ======================================================
+
+      map.addLayer({
+
+        id:
+          'migration-route-highlight',
+
+        type:
+          'line',
+
+        source:
+          'gaddi-route',
+
+        layout: {
+
+          'line-cap':
+            'round',
+
+          'line-join':
+            'round',
+
+          visibility:
+            'none'
+
+        },
+
+        paint: {
+
+          'line-width': [
+
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+
+            8,
+            0.7,
+
+            11,
+            1.1,
+
+            14,
+            1.7
+
+          ],
+
+          'line-opacity':
+            0.9,
+
+          'line-gradient': [
+
+            'interpolate',
+            ['linear'],
+            ['line-progress'],
+            0,
+            'rgba(255, 238, 181, 0)',
+            1,
+            'rgba(255, 238, 181, 0)'
+
+          ]
+
+        }
+
+      });
+
+
+      // ======================================================
       // POINTS
       // ======================================================
+
+      const riversResponse =
+        await fetch(
+          RIVERS_URL
+        );
+
+      if (
+        !riversResponse.ok
+      ) {
+
+        throw new Error(
+          `Could not load rivers: ${riversResponse.status}`
+        );
+
+      }
+
+      const riversGeoJSON =
+        await riversResponse.json();
+
+      const tandiRivers = {
+        type:
+          'FeatureCollection',
+        features:
+          riversGeoJSON.features
+            .filter(
+              (feature) =>
+                coordinatesTouchBounds(
+                  feature.geometry.coordinates,
+                  TANDI_RIVER_BOUNDS
+                )
+            )
+            .map(
+              (feature) => ({
+                ...feature,
+                geometry: {
+                  ...feature.geometry,
+                  coordinates:
+                    stripRiverElevation(
+                      feature.geometry.coordinates
+                    )
+                }
+              })
+            )
+      };
+
+      map.addSource(
+        'tandi-rivers',
+        {
+          type:
+            'geojson',
+          data:
+            tandiRivers,
+          lineMetrics:
+            true
+        }
+      );
+
+      map.addLayer({
+
+        id:
+          'tandi-river-shadow',
+
+        type:
+          'line',
+
+        source:
+          'tandi-rivers',
+
+        layout: {
+          visibility:
+            'none',
+          'line-cap':
+            'round',
+          'line-join':
+            'round'
+        },
+
+        paint: {
+          'line-color':
+            'rgba(20, 53, 66, 0.72)',
+          'line-width': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            10,
+            4,
+            13,
+            10,
+            16,
+            18
+          ],
+          'line-opacity':
+            0.9,
+          'line-opacity-transition': {
+            duration:
+              850
+          }
+        }
+
+      });
+
+      map.addLayer({
+
+        id:
+          'tandi-river-water',
+
+        type:
+          'line',
+
+        source:
+          'tandi-rivers',
+
+        layout: {
+          visibility:
+            'none',
+          'line-cap':
+            'round',
+          'line-join':
+            'round'
+        },
+
+        paint: {
+          'line-color':
+            '#3d9bb2',
+          'line-width': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            10,
+            2,
+            13,
+            6,
+            16,
+            12
+          ],
+          'line-opacity':
+            0.88,
+          'line-opacity-transition': {
+            duration:
+              850
+          }
+        }
+
+      });
+
+      map.addLayer({
+
+        id:
+          'tandi-river-flow',
+
+        type:
+          'line',
+
+        source:
+          'tandi-rivers',
+
+        layout: {
+          visibility:
+            'none',
+          'line-cap':
+            'round',
+          'line-join':
+            'round'
+        },
+
+        paint: {
+          'line-width': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            10,
+            0.7,
+            13,
+            1.5,
+            16,
+            3
+          ],
+          'line-opacity':
+            0.9,
+          'line-opacity-transition': {
+            duration:
+              850
+          },
+          'line-gradient': [
+            'interpolate',
+            ['linear'],
+            ['line-progress'],
+            0,
+            'rgba(195, 245, 251, 0.1)',
+            1,
+            'rgba(195, 245, 251, 0.1)'
+          ]
+        }
+
+      });
+
+      const animateRiverFlow =
+        (now) => {
+
+          if (
+            map.getLayer(
+              'tandi-river-flow'
+            )
+          ) {
+
+            const phase =
+              (now % 2200)
+              / 2200
+              * 0.78;
+
+            map.setPaintProperty(
+              'tandi-river-flow',
+              'line-gradient',
+              [
+                'interpolate',
+                ['linear'],
+                ['line-progress'],
+                0,
+                'rgba(195, 245, 251, 0.08)',
+                phase,
+                'rgba(195, 245, 251, 0.08)',
+                phase + 0.08,
+                'rgba(225, 255, 255, 0.88)',
+                phase + 0.16,
+                'rgba(195, 245, 251, 0.08)',
+                1,
+                'rgba(195, 245, 251, 0.08)'
+              ]
+            );
+
+          }
+
+          riverAnimationFrame =
+            requestAnimationFrame(
+              animateRiverFlow
+            );
+
+        };
+
+      riverAnimationFrame =
+        requestAnimationFrame(
+          animateRiverFlow
+        );
 
       const pointsResponse =
         await fetch(
@@ -3136,6 +4259,113 @@ map.on(
             '#f2eee4'
 
           ],
+
+          'text-halo-color':
+            'rgba(20, 17, 13, 0.95)',
+
+          'text-halo-width':
+            2
+
+        }
+
+      });
+
+
+      // ======================================================
+      // SHEARING LOCATION
+      // ======================================================
+
+      const shearingResponse =
+        await fetch(
+          SHEARING_URL
+        );
+
+      if (
+        !shearingResponse.ok
+      ) {
+
+        throw new Error(
+          `Could not load shearing locations: ${shearingResponse.status}`
+        );
+
+      }
+
+      const shearingGeoJSON =
+        await shearingResponse.json();
+
+      shearingGeoJSON.features =
+        shearingGeoJSON.features
+          .filter(
+            (feature) =>
+              feature.properties?.Name ===
+              'Bharmour'
+          )
+          .map(
+            (feature) => ({
+              ...feature,
+              geometry: {
+                ...feature.geometry,
+                coordinates:
+                  utm43ToWgs84(
+                    feature.geometry.coordinates[0],
+                    feature.geometry.coordinates[1]
+                  )
+              }
+            })
+          );
+
+      map.addSource(
+        'shearing-sites',
+        {
+          type:
+            'geojson',
+          data:
+            shearingGeoJSON
+        }
+      );
+
+      map.addLayer({
+
+        id:
+          'shearing-location',
+
+        type:
+          'symbol',
+
+        source:
+          'shearing-sites',
+
+        layout: {
+
+          visibility:
+            'none',
+
+          'text-field':
+            '✂  Shearing',
+
+          'text-size':
+            14,
+
+          'text-offset': [
+            2.2,
+            0
+          ],
+
+          'text-anchor':
+            'left',
+
+          'text-allow-overlap':
+            true,
+
+          'text-ignore-placement':
+            true
+
+        },
+
+        paint: {
+
+          'text-color':
+            '#f0b86b',
 
           'text-halo-color':
             'rgba(20, 17, 13, 0.95)',

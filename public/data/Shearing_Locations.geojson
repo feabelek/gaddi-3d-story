@@ -1,0 +1,9 @@
+{
+"type": "FeatureCollection",
+"name": "Shearing_Locations",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::32643" } },
+"features": [
+{ "type": "Feature", "properties": { "id": 1, "Name": "Bharmour", "Elev": 2036.0, "Elev_3D": 2336.0 }, "geometry": { "type": "Point", "coordinates": [ 644013.364816712215543, 3590669.013380037620664 ] } },
+{ "type": "Feature", "properties": { "id": 2, "Name": "Sarchu", "Elev": 5428.0, "Elev_3D": 5728.0 }, "geometry": { "type": "Point", "coordinates": [ 745371.70828698691912, 3623202.838665178976953 ] } }
+]
+}
