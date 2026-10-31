@@ -941,7 +941,7 @@ body::after {
   align-items: center;
 
   width: 100%;
-  height: 28px;
+  height: 42px;
 }
 
 
@@ -950,9 +950,9 @@ body::after {
 
   left: 0;
   right: 0;
-  top: 50%;
+  top: 29px;
 
-  height: 1px;
+  height: 2px;
 
   background:
     rgba(
@@ -987,20 +987,21 @@ body::after {
 
   pointer-events: auto;
 
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
 
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 42px;
 
   justify-self: center;
 
   padding: 0;
 
   border: 0;
-  border-radius: 50%;
+  border-radius: 0;
 
-  background: #171a15;
+  background: transparent;
   color:
     rgba(
       246,
@@ -1020,6 +1021,44 @@ body::after {
     color 180ms ease,
     box-shadow 180ms ease,
     transform 180ms ease;
+}
+
+
+.story-progress-stop::after {
+  content: '';
+
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+
+  width: 1px;
+  height: 9px;
+
+  background: #171a15;
+
+  transform: translateX(-50%);
+  transition:
+    background 180ms ease,
+    height 180ms ease,
+    width 180ms ease;
+}
+
+
+.story-progress-stop span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 22px;
+  min-height: 16px;
+  padding: 0 3px;
+
+  border-radius: 2px;
+}
+
+
+.story-progress-stop:not(.active) span {
+  background: #171a15;
 }
 
 
@@ -1043,13 +1082,19 @@ body::after {
 }
 
 
+.story-progress-stop:hover::after,
+.story-progress-stop:focus-visible::after {
+  height: 13px;
+  background: #dfb35f;
+}
+
+
 .story-progress-stop.visited {
   color: #dfb35f;
 }
 
 
 .story-progress-stop.active {
-  background: #dfb35f;
   color: #171a15;
 
   box-shadow:
@@ -1063,6 +1108,18 @@ body::after {
       95,
       0.2
     );
+}
+
+
+.story-progress-stop.active span {
+  background: #dfb35f;
+}
+
+
+.story-progress-stop.active::after {
+  width: 2px;
+  height: 16px;
+  background: #dfb35f;
 }
 
 
