@@ -1407,7 +1407,13 @@ body.image-viewer-open {
 
   clear: both;
 
+  position: relative;
+  z-index: 1;
+
+  width: 100%;
+
   margin-top: 0;
+  padding-top: 16px;
 
   font-size: 10px;
 
