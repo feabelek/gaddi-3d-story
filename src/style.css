@@ -983,6 +983,94 @@ body::after {
 }
 
 
+.story-progress-stop {
+  position: relative;
+
+  z-index: 1;
+
+  pointer-events: auto;
+
+  display: grid;
+  place-items: center;
+
+  width: 28px;
+  height: 28px;
+
+  justify-self: center;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: #171a15;
+  color:
+    rgba(
+      246,
+      242,
+      233,
+      0.55
+    );
+
+  font: inherit;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+
+  cursor: pointer;
+
+  transition:
+    background 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+
+.story-progress-stop:hover,
+.story-progress-stop:focus-visible {
+  color: #f7d58b;
+
+  outline: none;
+
+  box-shadow:
+    0
+    0
+    0
+    3px
+    rgba(
+      223,
+      179,
+      95,
+      0.22
+    );
+}
+
+
+.story-progress-stop.visited {
+  color: #dfb35f;
+}
+
+
+.story-progress-stop.active {
+  background: #dfb35f;
+  color: #171a15;
+
+  box-shadow:
+    0
+    0
+    0
+    3px
+    rgba(
+      223,
+      179,
+      95,
+      0.2
+    );
+}
+
+
+
+
 /* ============================================================
    SCROLL HINT
    ============================================================ */
