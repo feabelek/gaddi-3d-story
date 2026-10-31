@@ -1,25 +1,4 @@
-// ============================================================
-// PASTORALISM ATLAS
-//
-// INDIA ATLAS
-//      ↓ choose a case study
-//
-// HIMACHAL PRADESH
-//      ↓
-// BHARMOUR
-//      ↓
-// KUGTI
-//      ↓
-// TANDI
-//      ↓
-// DARCHA
-//      ↓
-// FULL ROUTE
-//
-// Future:
-// LADAKH
-// ARUNACHAL PRADESH
-// ============================================================
+// Pastoralism Atlas: a MapLibre story map for pastoral landscapes.
 
 
 // ============================================================
@@ -30,11 +9,6 @@ import * as maplibregl from 'maplibre-gl';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './style.css';
-
-import {
-  BHARMOUR_EXPLORE_ASSETS,
-  createExploreThreeLayer
-} from './explore-three-layer.js';
 
 import {
   CASE_STUDIES,
@@ -49,6 +23,10 @@ import {
   getCurrentCamera
 } from './atlas/camera-composer.js';
 
+import {
+  MAP_ASSETS
+} from './atlas/map-assets.js';
+
 import workerUrl from
   'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 
@@ -56,55 +34,21 @@ maplibregl.setWorkerUrl(workerUrl);
 
 
 // ============================================================
-// OLD APP
-// ============================================================
-
-const oldApp = document.querySelector('#app');
-
-if (oldApp) {
-  oldApp.style.display = 'none';
-}
-
-
-// ============================================================
 // FILE PATHS
 // ============================================================
 
-const ROUTE_URL =
-  '/data/states/himachal/geospatial/routes/Bharmour_Darcha_HP_Route.geojson';
-
-const ISPUR_DARCHA_ROUTE_URL =
-  '/data/states/himachal/geospatial/routes/HP_Story_Map_Route_Ispur_Darcha.geojson';
-
-const POINTS_URL =
-  '/data/states/himachal/geospatial/points/Bharmour_Darcha_RP_WGS84.geojson';
-
-const ISPUR_DARCHA_POINTS_URL =
-  '/data/states/himachal/geospatial/points/HP_Story_Route_Points.geojson';
-
-const INDIVIDUAL_LADAKH_POINTS_URL =
-  '/data/states/ladakh/geospatial/points/individual_1.geojson';
-
-const SHEARING_URL =
-  '/data/states/himachal/geospatial/context/Shearing_Locations.geojson';
-
-const RIVERS_URL =
-  '/data/states/himachal/geospatial/rivers/HP_Rivers.geojson';
-
-const TEMPLE_URL =
-  '/data/states/himachal/geospatial/context/Kartik_Swami_Temple_WGS84.geojson';
-
-const SANCTUARY_URL =
-  '/data/states/himachal/geospatial/context/Kugti_WS_WGS84.geojson';
-
-const HIMACHAL_BOUNDARY_URL =
-  '/data/states/himachal/geospatial/boundaries/HP_State_Boundary.geojson';
-
-const LADAKH_BOUNDARY_URL =
-  '/data/states/ladakh/geospatial/boundaries/Ladakh_Boundary.geojson';
-
-const ARUNACHAL_BOUNDARY_URL =
-  '/data/states/arunachal/geospatial/boundaries/AR_State_Boundary.geojson';
+const ROUTE_URL = MAP_ASSETS.himachal.route;
+const ISPUR_DARCHA_ROUTE_URL = MAP_ASSETS.himachal.storyRoute;
+const POINTS_URL = MAP_ASSETS.himachal.points;
+const ISPUR_DARCHA_POINTS_URL = MAP_ASSETS.himachal.storyPoints;
+const INDIVIDUAL_LADAKH_POINTS_URL = MAP_ASSETS.ladakh.points;
+const SHEARING_URL = MAP_ASSETS.himachal.shearing;
+const RIVERS_URL = MAP_ASSETS.himachal.rivers;
+const TEMPLE_URL = MAP_ASSETS.himachal.temple;
+const SANCTUARY_URL = MAP_ASSETS.himachal.sanctuary;
+const HIMACHAL_BOUNDARY_URL = MAP_ASSETS.himachal.boundary;
+const LADAKH_BOUNDARY_URL = MAP_ASSETS.ladakh.boundary;
+const ARUNACHAL_BOUNDARY_URL = MAP_ASSETS.arunachal.boundary;
 
 
 function utm43ToWgs84(
@@ -275,495 +219,7 @@ const ATLAS_CAMERA = {
 
 
 // ============================================================
-// CASE STUDIES
-//
-// For now, only the Himachal Pradesh case study is shown.
-//
-// The marker is positioned at Bharmour — the actual home
-// village and starting point of the Gaddi migration route.
-// These coordinates come from our route-point GIS data.
-// ============================================================
-
-/* Legacy Himachal data moved to src/stories/himachal.js.
-const CASE_STUDIES = [
-
-  {
-    id: 'himachal',
-
-    state: 'Himachal Pradesh',
-
-    subtitle: 'Gaddi pastoralists',
-
-    // Bharmour — actual GIS point
-    center: [
-      76.5326151804133,
-      32.4444683599394
-    ],
-
-    active: true
-  }
-
-];
-
-
-const CHAPTER_DIALOGUES = {
-  himachal: {
-    speaker: 'Mohanlal',
-    role: 'Gaddi shepherd',
-    quote: 'The route is not one road. It is the season changing under our feet.',
-    conversation: [
-      'Mohanlal: The route is not one road. It is the season changing under our feet.',
-      'Interviewer: And the flock knows when it is time to move?',
-      'Mohanlal: Before we do. They feel the grass, the cold, and the distance ahead.'
-    ]
-  },
-  bharmour: {
-    speaker: 'Mohanlal',
-    role: 'Shepherd from Bharmour',
-    quote: 'Before we climb, every animal has to be ready for the mountain.',
-    conversation: [
-      'Mohanlal: Before we climb, every animal has to be ready for the mountain.',
-      'Mohanlal: We shear them, wash them, and check the flock one by one.'
-    ]
-  },
-  kugti: {
-    speaker: 'Mohanlal',
-    role: 'On the route to the high pastures',
-    quote: 'A familiar pass can still ask a new question every year.',
-    conversation: [
-      'Mohanlal: A familiar pass can still ask a new question every year.',
-      'Mohanlal: The snow, the water, and the animals are never exactly the same.'
-    ]
-  },
-  'kartik-swami-temple': {
-    speaker: 'Mohanlal',
-    role: 'At Kartik Swami Temple',
-    quote: 'We pause here before the route opens toward the higher valleys.',
-    conversation: [
-      'Mohanlal: We pause here before the route opens toward the higher valleys.',
-      'Mohanlal: A journey also needs prayer, not only provisions.'
-    ]
-  },
-  tandi: {
-    speaker: 'Mohanlal',
-    role: 'At the valley crossing',
-    quote: 'Here the flock can rest. The next climb will take everything from them again.',
-    conversation: [
-      'Mohanlal: Here the flock can rest. The next climb will take everything from them again.',
-      'Interviewer: Is this where the landscape begins to feel different?',
-      'Mohanlal: The land becomes wider, but the work becomes no lighter.'
-    ]
-  },
-  darcha: {
-    speaker: 'Mohanlal',
-    role: 'In the summer pastures',
-    quote: 'The flock spreads out here, but we still keep each other in sight.',
-    conversation: [
-      'Mohanlal: The flock spreads out here, but we still keep each other in sight.',
-      'Mohanlal: These weeks are for grazing, lambing, and repairing what the journey has worn down.'
-    ]
-  },
-  'full-route': {
-    speaker: 'Mohanlal',
-    role: 'Looking back on the annual cycle',
-    quote: 'When we return, the path is changed by the time we have spent on it.',
-    conversation: [
-      'Mohanlal: When we return, the path is changed by the time we have spent on it.',
-      'Mohanlal: We carry the mountain home with us, even when the flock comes down.'
-    ]
-  }
-};
-
-
-// ============================================================
-// HIMACHAL STORY
-//
-// IMPORTANT:
-//
-// India is NOT in this array anymore.
-//
-// This array begins only after the user chooses Himachal.
-// ============================================================
-
-const STORY = [
-
-  // ----------------------------------------------------------
-  // 0 — HIMACHAL PRADESH
-  // ----------------------------------------------------------
-
-  {
-    id: 'himachal',
-
-    eyebrow:
-      'Case Study 01 · Western Himalaya',
-
-    title:
-      'A landscape shaped by movement',
-
-    location:
-      'Himachal Pradesh',
-
-    text:
-      `The Gaddi are a traditional agro-pastoralist community
-      whose life revolves around rearing sheep and goats in the Western Himalaya.
-      During summer, they move their flocks to high-altitude pastures while in winter,
-      they descend toward the lower hills and plains. `,
-
-    center: [
-      77.15,
-      31.82
-    ],
-
-    zoom: 7.25,
-
-    pitch: 34,
-
-    bearing: -8,
-
-    routeProgress: 0,
-
-    image: null,
-
-    showLegend: false
-  },
-
-
-  // ----------------------------------------------------------
-  // 1 — BHARMOUR
-  // ----------------------------------------------------------
-
-  {
-    id: 'bharmour',
-
-    eyebrow:
-      'Home Village',
-
-    title:
-      'Preparing for the climb',
-
-    location:
-      'Bharmour',
-
-    text:
-      `Our journey follows Mohanlal, a shepherd from Bharmour, for whom returning to Bharmour is both a pause and
-      a flurry of activity before the long climb to the summer
-      pastures. The flock is sheared, supplies are gathered,
-      and the animals are prepared for the migration ahead.`,
-
-    detail:
-      `Before departure, the sheep and goats are taken to the
-      village dipping site and washed in a medicated solution
-      to help protect the herd during the months of migration.`,
-
-    center: [
-      76.547306,
-      32.440468
-    ],
-
-    zoom: 13.5,
-
-    pitch: 68,
-
-    bearing: 128.7,
-
-    routeProgress: 0.035,
-
-    routeStop: [
-      76.5326151804133,
-      32.4444683599394
-    ],
-
-    image:
-      IMAGES.bharmour,
-
-    secondImage:
-      IMAGES.dipping,
-
-    showLegend: true
-  },
-
-
-  // ----------------------------------------------------------
-  // 2 — KUGTI
-  // ----------------------------------------------------------
-
-  {
-    id: 'kugti',
-
-    eyebrow:
-      'The Journey',
-
-    title:
-      'Into the high mountains',
-
-    location:
-      'Kugti',
-
-    text:
-      `Leaving Bharmour, the migration climbs through forests,
-      valleys and alpine landscapes. These routes connect home
-      villages with grazing grounds and have been travelled
-      across generations.`,
-
-    detail:
-      `Mountain passes are more than points on a map. They link
-      valleys and grazing grounds, marking the movement from one
-      seasonal landscape into another. Near Kugti, the route also
-      passes a cultural pilgrimage site at Kartik Swami Temple and
-      enters the protected landscape of Kugti Wildlife Sanctuary.`,
-
-    center: [
-      76.715469,
-      32.471323
-    ],
-
-    zoom: 13.5,
-
-    pitch: 68,
-
-    bearing: 88.52,
-
-    routeProgress: 0.30,
-
-    routeStop: [
-      76.70291390105247,
-      32.46933363515453
-    ],
-
-    showKugtiContext: true,
-
-    image:
-      IMAGES.jalsu,
-
-    secondImage: null,
-
-    showLegend: true
-  },
-
-
-  // ----------------------------------------------------------
-  // 3 — KARTIK SWAMI TEMPLE
-  // ----------------------------------------------------------
-
-  {
-    id: 'kartik-swami-temple',
-
-    eyebrow:
-      'Cultural Site',
-
-    title:
-      'A pause along the route',
-
-    location:
-      'Kartik Swami Temple',
-
-    text:
-      `Along Mohanlal’s route, the Kartik Swami Temple stands as both a spiritual stop and a cultural anchor.
-      Here, animal sacrifices, prayers, and seasonal festivals
-      like Lohri ki Sankranti and Veeru ki Sankranti mark an important moment in the
-      pastoralists’ annual migration cycle.
-.`,
-
-    detail:
-      ``,
-
-    center: [
-      76.733215,
-      32.478799
-    ],
-
-    zoom: 15.156,
-
-    pitch: 50,
-
-    bearing: 7.99,
-
-    routeProgress: 0.34,
-
-    routeStop: [
-      76.73502,
-      32.47985
-    ],
-
-    showKugtiContext: true,
-
-    image:
-      IMAGES.temple,
-
-    secondImage: null,
-
-    showLegend: true
-  },
-
-
-  // ----------------------------------------------------------
-  // 4 — TANDI
-  // ----------------------------------------------------------
-
-  {
-    id: 'tandi',
-
-    eyebrow:
-      'Ecological Transition',
-
-    title:
-      'The landscape opens',
-
-    location:
-      'Tandi',
-
-    text:
-      `Beyond the alpine meadows, the migration enters the
-      higher elevations of Lahaul. The landscape becomes
-      increasingly open and sparse, with grasses, herbs,
-      stunted blue pines and low shrubs across the slopes.`,
-
-    detail:
-      `Tandi, at the confluence of the Chandra and Bhaga rivers forming the Chenab,
-      has historically been an important tri-junction on the migration route connecting Leh, Killar, and Kaza.
-      The gentle slopes here give Mohanlal and his flock a chance to rest and graze before the final journey into the higher summer pastures
-    `,
-
-    center: [
-      76.983644,
-      32.557597
-    ],
-
-    zoom: 13.2,
-
-    pitch: 50,
-
-    bearing: 74.76,
-
-    routeProgress: 0.72,
-
-    routeStop: [
-      76.98164016179844,
-      32.55070214186458
-    ],
-
-    showKugtiContext: true,
-
-    image: null,
-
-    secondImage: null,
-
-    showLegend: true
-  },
-
-
-  // ----------------------------------------------------------
-  // 5 — DARCHA
-  // ----------------------------------------------------------
-
-  {
-    id: 'darcha',
-
-    eyebrow:
-      'Summer Grazing Grounds',
-
-    title:
-      'Arrival in the high pastures',
-
-    location:
-      'Darcha',
-
-    text:
-      `At last, Mohanlal reaches the wide valleys of the
-      high-altitude summer pastures. The broad basins allow the
-      flock to spread out and graze while the shepherd rests,
-      repairs equipment and prepares for the weeks ahead.`,
-
-    detail:
-      `From June to August, the flock grazes these alpine
-      meadows. It is also lambing season, when Mohanlal tends
-      to newborn animals while making the most of the rich
-      summer pastures.`,
-
-    center: [
-      77.198028,
-      32.671213
-    ],
-
-    zoom: 13.5,
-
-    pitch: 52,
-
-    bearing: -71.24,
-
-    routeProgress: 1,
-
-    routeStop: [
-      77.19755939568283,
-      32.67493238488826
-    ],
-
-    showKugtiContext: true,
-
-    image:
-      IMAGES.darcha,
-
-    secondImage: null,
-
-    showLegend: true
-  },
-
-
-  // ----------------------------------------------------------
-  // 6 — FULL ROUTE
-  // ----------------------------------------------------------
-
-  {
-    id: 'full-route',
-
-    eyebrow:
-      'The Migration',
-
-    title:
-      'A journey across landscapes',
-
-    location:
-      'Bharmour → Darcha',
-
-    text:
-      `After the summer grazing, Mohanlal begins his journey back to the home village and then to the winter pastures,
-      moving through the high and low elevations during September and October to complete his annual cycle.
-      Viewing the full route highlights how a single community’s migration shapes its entire way of life.`,
-
-    detail:
-    `For the Gaddi pastoralists, transhumance is a living connection between people, animals,
-      landscapes, and traditions. Through their seasonal movements, shepherds sustain local economies,
-      maintain cultural heritage, and care for fragile mountain ecosystems.
- `,
-
-    center: [
-      76.923171,
-      32.542367
-    ],
-
-    zoom: 10.042,
-
-    pitch: 30.5,
-
-    bearing: -68.06,
-
-    routeProgress: 1,
-
-    showKugtiContext: true,
-
-    image: null,
-
-    secondImage: null,
-
-    showLegend: true
-  }
-
-];
-*/
-
-
-// ============================================================
-// STATE
+// STORY STATE
 // ============================================================
 
 let STORY = HIMACHAL_STORY;
@@ -783,14 +239,6 @@ let cameraAnimating = false;
 let storyReady = false;
 
 let scrollLocked = false;
-
-let exploreState = 'story';
-
-let exploreSnapshot = null;
-
-let exploreTransitionToken = 0;
-
-let exploreThreeLayer = null;
 
 let templeMarker = null;
 
@@ -1036,335 +484,7 @@ map.addControl(
 );
 
 
-/* ============================================================
-// LEGACY CAMERA COMPOSER MOVED TO src/atlas/camera-composer.js
-//
-// Development-only tool. Open the app with ?composer=1 to
-// compose and copy refined camera stops without changing the
-// normal public experience.
-// ============================================================
 
-function getCurrentCamera() {
-
-  const center =
-    map.getCenter();
-
-  return {
-    center: [
-      Number(
-        center.lng.toFixed(6)
-      ),
-      Number(
-        center.lat.toFixed(6)
-      )
-    ],
-    zoom: Number(
-      map.getZoom().toFixed(3)
-    ),
-    pitch: Number(
-      map.getPitch().toFixed(2)
-    ),
-    bearing: Number(
-      map.getBearing().toFixed(2)
-    )
-  };
-
-}
-
-
-function formatCamera(camera) {
-
-  return JSON.stringify(
-    camera,
-    null,
-    2
-  );
-
-}
-
-
-function createCameraComposer() {
-
-  const composer =
-    document.createElement('aside');
-
-  composer.id =
-    'camera-composer';
-
-  composer.innerHTML = `
-    <div class="camera-composer-heading">
-      Camera Composer
-      <span>DEV</span>
-    </div>
-
-    <label class="camera-composer-field">
-      <span>Story stop</span>
-      <select id="camera-composer-stop"></select>
-    </label>
-
-    <div class="camera-composer-readout">
-      <code id="camera-composer-output"></code>
-    </div>
-
-    <div class="camera-composer-actions">
-      <button id="camera-composer-target" type="button">Go to stop</button>
-      <button id="camera-composer-capture" type="button">Capture stop</button>
-      <button id="camera-composer-copy" type="button">Copy camera</button>
-      <button id="camera-composer-copy-all" type="button">Copy all</button>
-    </div>
-
-    <div id="camera-composer-status" class="camera-composer-status">
-      Move the map, then copy the refined camera values.
-    </div>
-  `;
-
-  document.body.appendChild(
-    composer
-  );
-
-  const stopSelect =
-    composer.querySelector(
-      '#camera-composer-stop'
-    );
-
-  const output =
-    composer.querySelector(
-      '#camera-composer-output'
-    );
-
-  const status =
-    composer.querySelector(
-      '#camera-composer-status'
-    );
-
-  STORY.forEach(
-    (chapter, index) => {
-
-      const option =
-        document.createElement('option');
-
-      option.value =
-        String(index);
-
-      option.textContent =
-        `${String(index).padStart(2, '0')} · ${chapter.location}`;
-
-      stopSelect.appendChild(
-        option
-      );
-
-    }
-  );
-
-  const selectedChapter = () =>
-    STORY[
-      Number(
-        stopSelect.value
-      )
-    ];
-
-  const updateOutput = () => {
-
-    output.textContent =
-      formatCamera(
-        getCurrentCamera()
-      );
-
-  };
-
-  const setStatus = (
-    message
-  ) => {
-
-    status.textContent =
-      message;
-
-  };
-
-  const copyText = async (
-    text,
-    message
-  ) => {
-
-    try {
-
-      await navigator.clipboard.writeText(
-        text
-      );
-
-      setStatus(
-        message
-      );
-
-    }
-
-    catch (
-      error
-    ) {
-
-      output.textContent =
-        text;
-
-      setStatus(
-        'Clipboard access was blocked. Select and copy the text above.'
-      );
-
-    }
-
-  };
-
-  composer
-    .querySelector(
-      '#camera-composer-target'
-    )
-    .addEventListener(
-      'click',
-      () => {
-
-        const chapter =
-          selectedChapter();
-
-        map.easeTo({
-          center:
-            chapter.center,
-          zoom:
-            chapter.zoom,
-          pitch:
-            chapter.pitch,
-          bearing:
-            chapter.bearing,
-          duration:
-            900
-        });
-
-        setStatus(
-          'Adjust the map, then copy the camera values.'
-        );
-
-      }
-    );
-
-  composer
-    .querySelector(
-      '#camera-composer-capture'
-    )
-    .addEventListener(
-      'click',
-      () => {
-
-        const chapter =
-          selectedChapter();
-
-        const camera =
-          getCurrentCamera();
-
-        chapter.center =
-          camera.center;
-        chapter.zoom =
-          camera.zoom;
-        chapter.pitch =
-          camera.pitch;
-        chapter.bearing =
-          camera.bearing;
-
-        setStatus(
-          `Captured camera for ${chapter.location}. Use “Copy all” to export the refined stops.`
-        );
-
-      }
-    );
-
-  composer
-    .querySelector(
-      '#camera-composer-copy'
-    )
-    .addEventListener(
-      'click',
-      () => {
-
-        const camera =
-          getCurrentCamera();
-
-        copyText(
-          formatCamera(
-            camera
-          ),
-          `Copied camera for ${selectedChapter().location}.`
-        );
-
-      }
-    );
-
-  composer
-    .querySelector(
-      '#camera-composer-copy-all'
-    )
-    .addEventListener(
-      'click',
-      () => {
-
-        const cameras = {};
-
-        STORY.forEach(
-          (chapter) => {
-
-            cameras[
-              chapter.id
-            ] = {
-              center:
-                chapter.center,
-              zoom:
-                chapter.zoom,
-              pitch:
-                chapter.pitch,
-              bearing:
-                chapter.bearing
-            };
-
-          }
-        );
-
-        copyText(
-          formatCamera(
-            cameras
-          ),
-          `Copied ${STORY.length} story cameras.`
-        );
-
-      }
-    );
-
-  stopSelect.addEventListener(
-    'change',
-    () => {
-
-      setStatus(
-        'Use “Go to stop” or move the map to compose a new view.'
-      );
-
-    }
-  );
-
-  map.on(
-    'move',
-    updateOutput
-  );
-
-  updateOutput();
-
-}
-
-
-if (
-  new URLSearchParams(
-    window.location.search
-  ).has('composer')
-) {
-
-  createCameraComposer();
-
-}
-*/
 
 
 if (
@@ -1595,16 +715,6 @@ storyPanel.innerHTML = `
 
     <p id="story-detail"></p>
 
-    <button
-      id="explore-bharmour"
-      type="button"
-      hidden
-    >
-      <span>Explore Bharmour</span>
-      <span class="explore-button-arrow" aria-hidden="true">↗</span>
-    </button>
-
-
     <div class="story-progress">
 
       <div
@@ -1650,47 +760,6 @@ storyPanel.innerHTML = `
 
 document.body.appendChild(
   storyPanel
-);
-
-
-const exploreModePanel =
-  document.createElement('aside');
-
-
-exploreModePanel.id =
-  'explore-mode-panel';
-
-
-exploreModePanel.setAttribute(
-  'aria-hidden',
-  'true'
-);
-
-
-exploreModePanel.innerHTML = `
-
-  <div class="explore-mode-label">
-    <span class="explore-mode-pulse" aria-hidden="true"></span>
-    Bharmour · Explore Mode
-  </div>
-
-  <p class="explore-mode-guidance">
-    Explore this place at your own pace.
-  </p>
-
-  <button
-    id="return-to-story"
-    type="button"
-  >
-    <span>Return to Story</span>
-    <span aria-hidden="true">←</span>
-  </button>
-
-`;
-
-
-document.body.appendChild(
-  exploreModePanel
 );
 
 
@@ -2335,18 +1404,6 @@ const storyPanelInner =
   );
 
 
-const exploreBharmourButton =
-  document.querySelector(
-    '#explore-bharmour'
-  );
-
-
-const returnToStoryButton =
-  document.querySelector(
-    '#return-to-story'
-  );
-
-
 dialogueToggle.addEventListener(
   'click',
   () => {
@@ -2420,10 +1477,6 @@ function updateStoryPanel() {
 
       detailElement.textContent =
         chapter.detail || '';
-
-
-      exploreBharmourButton.hidden =
-        chapter.id !== 'bharmour';
 
 
       // ======================================================
@@ -4097,7 +3150,7 @@ function updateMapVisibility() {
 // MAP INTERACTION
 // ============================================================
 
-function disableExploration() {
+function disableMapInteraction() {
 
   map.dragPan.disable();
 
@@ -4114,7 +3167,7 @@ function disableExploration() {
 }
 
 
-function enableExploration() {
+function enableMapInteraction() {
 
   map.dragPan.enable();
 
@@ -4627,313 +3680,6 @@ if (
 
 
 // ============================================================
-// EXPLORE BHARMOUR SHELL
-// ============================================================
-
-const exploreInteractionHandlers = [
-  'dragPan',
-  'dragRotate',
-  'scrollZoom',
-  'touchZoomRotate',
-  'doubleClickZoom',
-  'keyboard'
-];
-
-
-function captureExploreSnapshot() {
-
-  const layerVisibility = {};
-
-  map.getStyle().layers.forEach(
-    (layer) => {
-      layerVisibility[layer.id] =
-        map.getLayoutProperty(
-          layer.id,
-          'visibility'
-        ) || 'visible';
-    }
-  );
-
-  const interactionState = {};
-
-  exploreInteractionHandlers.forEach(
-    (handlerName) => {
-      interactionState[handlerName] =
-        map[handlerName].isEnabled();
-    }
-  );
-
-  return {
-    currentStoryIndex,
-    camera: getCurrentCamera(map),
-    maxZoom: map.getMaxZoom(),
-    panelScrollTop: storyPanelInner.scrollTop,
-    scrollLocked,
-    layerVisibility,
-    interactionState
-  };
-
-}
-
-
-function restoreExploreSnapshot(
-  snapshot
-) {
-
-  if (
-    !snapshot
-  ) {
-    return;
-  }
-
-  currentStoryIndex =
-    snapshot.currentStoryIndex;
-
-  map.jumpTo(
-    snapshot.camera
-  );
-
-  map.setMaxZoom(
-    snapshot.maxZoom
-  );
-
-  Object.entries(
-    snapshot.layerVisibility
-  ).forEach(
-    ([layerId, visibility]) => {
-      if (
-        map.getLayer(layerId)
-      ) {
-        map.setLayoutProperty(
-          layerId,
-          'visibility',
-          visibility
-        );
-      }
-    }
-  );
-
-  Object.entries(
-    snapshot.interactionState
-  ).forEach(
-    ([handlerName, enabled]) => {
-      const handler =
-        map[handlerName];
-
-      if (
-        enabled
-      ) {
-        handler.enable();
-      }
-      else {
-        handler.disable();
-      }
-    }
-  );
-
-  storyPanelInner.scrollTop =
-    snapshot.panelScrollTop;
-
-  scrollLocked =
-    snapshot.scrollLocked;
-
-}
-
-
-function exploreMotionDuration() {
-  return window.matchMedia(
-    '(prefers-reduced-motion: reduce)'
-  ).matches
-    ? 0
-    : 420;
-}
-
-
-function waitForExploreTransition(
-  token,
-  duration
-) {
-  return new Promise(
-    (resolve) => {
-      window.setTimeout(
-        () => resolve(
-          token === exploreTransitionToken
-        ),
-        duration
-      );
-    }
-  );
-}
-
-
-async function enterExploreMode() {
-
-  if (
-    exploreState !== 'story'
-    || atlasMode
-    || currentStoryIndex !== 1
-    || cameraAnimating
-  ) {
-    return;
-  }
-
-  exploreSnapshot =
-    captureExploreSnapshot();
-
-  const token =
-    ++exploreTransitionToken;
-
-  exploreState =
-    'entering';
-
-  map.setMaxZoom(
-    18
-  );
-
-  scrollLocked =
-    true;
-
-  exploreBharmourButton.disabled =
-    true;
-
-  storyPanel.classList.add(
-    'explore-hiding'
-  );
-
-  const completed =
-    await waitForExploreTransition(
-      token,
-      exploreMotionDuration()
-    );
-
-  if (
-    !completed
-  ) {
-    return;
-  }
-
-  exploreState =
-    'exploring';
-
-  if (
-    exploreThreeLayer
-  ) {
-    exploreThreeLayer.refreshTerrain();
-
-    map.once(
-      'idle',
-      () => {
-        if (
-          exploreState === 'exploring'
-        ) {
-          exploreThreeLayer.refreshTerrain();
-        }
-      }
-    );
-
-    exploreThreeLayer.fadeTo(
-      1,
-      exploreMotionDuration()
-    );
-  }
-
-  exploreModePanel.classList.add(
-    'visible'
-  );
-
-  exploreModePanel.setAttribute(
-    'aria-hidden',
-    'false'
-  );
-
-  returnToStoryButton.focus();
-
-}
-
-
-async function exitExploreMode() {
-
-  if (
-    exploreState === 'story'
-    || exploreState === 'exiting'
-  ) {
-    return;
-  }
-
-  const snapshot =
-    exploreSnapshot;
-
-  const token =
-    ++exploreTransitionToken;
-
-  exploreState =
-    'exiting';
-
-  if (
-    exploreThreeLayer
-  ) {
-    exploreThreeLayer.fadeTo(
-      0,
-      exploreMotionDuration()
-    );
-  }
-
-  exploreModePanel.classList.remove(
-    'visible'
-  );
-
-  exploreModePanel.setAttribute(
-    'aria-hidden',
-    'true'
-  );
-
-  storyPanel.classList.remove(
-    'explore-hiding'
-  );
-
-  const completed =
-    await waitForExploreTransition(
-      token,
-      exploreMotionDuration()
-    );
-
-  if (
-    !completed
-  ) {
-    return;
-  }
-
-  restoreExploreSnapshot(
-    snapshot
-  );
-
-  exploreSnapshot =
-    null;
-
-  exploreState =
-    'story';
-
-  exploreBharmourButton.disabled =
-    false;
-
-  exploreBharmourButton.focus();
-
-}
-
-
-exploreBharmourButton.addEventListener(
-  'click',
-  enterExploreMode
-);
-
-
-returnToStoryButton.addEventListener(
-  'click',
-  exitExploreMode
-);
-
-
-// ============================================================
 // ENTER STATE STORY
 // ============================================================
 
@@ -4965,7 +3711,7 @@ async function enterStateCaseStudy(caseStudy) {
   updateProgressStopsForStory();
 
 
-  disableExploration();
+  disableMapInteraction();
 
 
   // Fade atlas text and markers.
@@ -5070,7 +3816,7 @@ async function enterStateCaseStudy(caseStudy) {
       false;
 
 
-    enableExploration();
+    enableMapInteraction();
 
   }
 
@@ -5096,7 +3842,7 @@ async function returnToAtlas() {
     true;
 
 
-  disableExploration();
+  disableMapInteraction();
 
 
   legend.classList.remove(
@@ -5192,7 +3938,7 @@ async function returnToAtlas() {
       false;
 
 
-    enableExploration();
+    enableMapInteraction();
 
   }
 
@@ -5229,8 +3975,6 @@ async function goToChapter(
     ||
     !storyReady
     ||
-    exploreState !== 'story'
-    ||
     cameraAnimating
   ) {
 
@@ -5266,7 +4010,7 @@ async function goToChapter(
     true;
 
 
-  disableExploration();
+  disableMapInteraction();
 
 
   storyPanel.classList.add(
@@ -5481,7 +4225,7 @@ if (Number.isFinite(targetProgress)) {
       false;
 
 
-    enableExploration();
+    enableMapInteraction();
 
 
     storyPanel.classList.remove(
@@ -5513,8 +4257,6 @@ window.addEventListener(
       atlasMode
       ||
       !storyReady
-      ||
-      exploreState !== 'story'
       ||
       cameraAnimating
       ||
@@ -7219,33 +5961,6 @@ map.on(
           32.42
         ])
         .addTo(map);
-
-
-      exploreThreeLayer =
-        createExploreThreeLayer({
-          map,
-          assets:
-            BHARMOUR_EXPLORE_ASSETS
-        });
-
-      map.addLayer(
-        exploreThreeLayer
-      );
-
-      map.on(
-        'moveend',
-        () => {
-          if (
-            exploreState === 'exploring'
-          ) {
-            exploreThreeLayer.refreshTerrain();
-          }
-        }
-      );
-
-      exploreThreeLayer.setVisible(
-        false
-      );
 
 
       // ======================================================

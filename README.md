@@ -97,6 +97,10 @@ http://localhost:5173/?composer=1
 
 The **Camera Composer** lets you choose a story stop, move or zoom the map, and capture the current `center`, `zoom`, `pitch`, and `bearing` values. Use **Capture stop** for the selected chapter, then **Copy all** to export the refined camera presets. The composer is hidden during normal use.
 
+### Future development: authored 3D scenes
+
+The active project is intentionally focused on the MapLibre atlas and its geographic story. A separate local development branch preserves an exploratory Three.js layer and the Bharmour living terrain study for later work. Those experiments are not included in the active GitHub branch or current production build. They may eventually support authored close-up scenes with terrain, woodland, sheep, and shepherds after the atlas story and map structure are stable.
+
 ### 6. Stop the atlas
 
 Return to the Terminal or PowerShell window and press:
