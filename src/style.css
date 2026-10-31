@@ -854,6 +854,161 @@ body::after {
 
 
 /* ============================================================
+   STORY IMAGES
+   ============================================================ */
+
+#story-media {
+  display: flex;
+
+  gap: 8px;
+
+  width: 100%;
+
+  margin:
+    22px
+    0
+    18px;
+}
+
+
+#story-media:empty {
+  display: none;
+}
+
+
+.story-image {
+  display: block;
+
+  width: 100%;
+
+  max-height: 210px;
+
+  object-fit: cover;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      0.15
+    );
+
+  box-shadow:
+    0
+    12px
+    40px
+    rgba(
+      0,
+      0,
+      0,
+      0.32
+    );
+}
+
+
+.story-image-secondary {
+  width: 38%;
+
+  object-position: center;
+}
+
+
+/* ============================================================
+   STORY PROGRESS
+   ============================================================ */
+
+.story-progress {
+  display: grid;
+
+  grid-template-columns:
+    auto
+    1fr
+    auto;
+
+  align-items: center;
+
+  gap: 10px;
+
+  width: 100%;
+
+  max-width: 370px;
+
+  margin-top: 28px;
+
+  font-size: 9px;
+
+  letter-spacing: 0.12em;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      0.5
+    );
+}
+
+
+.story-progress-line {
+  position: relative;
+
+  height: 1px;
+
+  overflow: hidden;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.22
+    );
+}
+
+
+#story-progress-fill {
+  position: absolute;
+
+  left: 0;
+  top: 0;
+
+  width: 0%;
+  height: 100%;
+
+  background: #dfb35f;
+
+  transition:
+    width 700ms ease;
+}
+
+
+/* ============================================================
+   SCROLL HINT
+   ============================================================ */
+
+#story-scroll-hint {
+  margin-top: 14px;
+
+  font-size: 10px;
+
+  letter-spacing: 0.11em;
+
+  text-transform: uppercase;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      0.46
+    );
+}
+
+
+
+
+/* ============================================================
    STORY TRANSITIONS
    ============================================================ */
 
