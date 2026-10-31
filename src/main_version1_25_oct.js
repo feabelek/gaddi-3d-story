@@ -46,13 +46,13 @@ import './style.css';
 // ============================================================
 
 const DEM_URL =
-  '/data/Bharmour_Darcha_DEM_Web.tif';
+  '/data/states/himachal/geospatial/terrain/Bharmour_Darcha_DEM_Web.tif';
 
 const ROUTE_URL =
-  '/data/Bharmour_Darcha_UTM43N.geojson';
+  '/data/states/himachal/geospatial/routes/Bharmour_Darcha_UTM43N.geojson';
 
 const ROUTE_POINTS_URL =
-  '/data/Bharmour_Darcha_RP.geojson';
+  '/data/states/himachal/geospatial/points/Bharmour_Darcha_RP.geojson';
 
 
 // ============================================================

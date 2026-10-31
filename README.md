@@ -87,6 +87,16 @@ Open that address in your web browser. Keep the command window open while using 
 
 The map uses online satellite and terrain imagery, so the internet connection must remain active while viewing it.
 
+### Refine Camera Views (Development Tool)
+
+To compose more accurate map angles for the story chapters, add `?composer=1` to the local address:
+
+```text
+http://localhost:5173/?composer=1
+```
+
+The **Camera Composer** lets you choose a story stop, move or zoom the map, and capture the current `center`, `zoom`, `pitch`, and `bearing` values. Use **Capture stop** for the selected chapter, then **Copy all** to export the refined camera presets. The composer is hidden during normal use.
+
 ### 6. Stop the atlas
 
 Return to the Terminal or PowerShell window and press:

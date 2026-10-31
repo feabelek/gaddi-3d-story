@@ -15,4 +15,5 @@
 - `src/main.js` owns the current atlas UI, story state, camera transitions, and MapLibre layers. It fetches route and point GeoJSON from `/data/` at runtime.
 - `public/data/` contains the route/point GIS files and story images. Preserve these root-relative `/data/...` URLs when moving or adding assets.
 - `src/main copy.js` owns the alternate Three.js landscape, MapLibre overview, and GeoTIFF terrain loading. Its `geotiff` dependency must remain declared in `package.json`.
+- Open the live app with `?composer=1` to use the development Camera Composer for refining story-stop `center`, `zoom`, `pitch`, and `bearing` values; it is hidden without that query parameter.
 - The map depends on remote Esri satellite and AWS terrain tiles, so local runtime verification needs network access even though the Vite build does not.

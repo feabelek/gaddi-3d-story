@@ -31,6 +31,24 @@ import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './style.css';
 
+import {
+  BHARMOUR_EXPLORE_ASSETS,
+  createExploreThreeLayer
+} from './explore-three-layer.js';
+
+import {
+  CASE_STUDIES,
+  CHAPTER_DIALOGUES as HIMACHAL_DIALOGUES,
+  IMAGES,
+  STORY as HIMACHAL_STORY,
+  STORY_REGISTRY
+} from './stories/index.js';
+
+import {
+  createCameraComposer,
+  getCurrentCamera
+} from './atlas/camera-composer.js';
+
 import workerUrl from
   'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 
@@ -53,42 +71,40 @@ if (oldApp) {
 // ============================================================
 
 const ROUTE_URL =
-  '/data/Bharmour_Darcha_HP_Route.geojson';
+  '/data/states/himachal/geospatial/routes/Bharmour_Darcha_HP_Route.geojson';
+
+const ISPUR_DARCHA_ROUTE_URL =
+  '/data/states/himachal/geospatial/routes/HP_Story_Map_Route_Ispur_Darcha.geojson';
 
 const POINTS_URL =
-  '/data/Bharmour_Darcha_RP_WGS84.geojson';
+  '/data/states/himachal/geospatial/points/Bharmour_Darcha_RP_WGS84.geojson';
+
+const ISPUR_DARCHA_POINTS_URL =
+  '/data/states/himachal/geospatial/points/HP_Story_Route_Points.geojson';
+
+const INDIVIDUAL_LADAKH_POINTS_URL =
+  '/data/states/ladakh/geospatial/points/individual_1.geojson';
 
 const SHEARING_URL =
-  '/data/Shearing_Locations.geojson';
+  '/data/states/himachal/geospatial/context/Shearing_Locations.geojson';
 
 const RIVERS_URL =
-  '/data/HP_Rivers.geojson';
+  '/data/states/himachal/geospatial/rivers/HP_Rivers.geojson';
 
 const TEMPLE_URL =
-  '/data/Kartik_Swami_Temple_WGS84.geojson';
+  '/data/states/himachal/geospatial/context/Kartik_Swami_Temple_WGS84.geojson';
 
 const SANCTUARY_URL =
-  '/data/Kugti_WS_WGS84.geojson';
+  '/data/states/himachal/geospatial/context/Kugti_WS_WGS84.geojson';
 
+const HIMACHAL_BOUNDARY_URL =
+  '/data/states/himachal/geospatial/boundaries/HP_State_Boundary.geojson';
 
-const IMAGES = {
+const LADAKH_BOUNDARY_URL =
+  '/data/states/ladakh/geospatial/boundaries/Ladakh_Boundary.geojson';
 
-  bharmour:
-    '/data/images/Bharmour.png',
-
-  dipping:
-    '/data/images/Bharmour_goat_dipping.png',
-
-  jalsu:
-    '/data/images/jalsu_pass.png',
-
-  temple:
-    '/data/kartik_swami_temple.png',
-
-  darcha:
-    '/data/images/Darcha.jpg'
-
-};
+const ARUNACHAL_BOUNDARY_URL =
+  '/data/states/arunachal/geospatial/boundaries/AR_State_Boundary.geojson';
 
 
 function utm43ToWgs84(
@@ -268,6 +284,7 @@ const ATLAS_CAMERA = {
 // These coordinates come from our route-point GIS data.
 // ============================================================
 
+/* Legacy Himachal data moved to src/stories/himachal.js.
 const CASE_STUDIES = [
 
   {
@@ -287,6 +304,75 @@ const CASE_STUDIES = [
   }
 
 ];
+
+
+const CHAPTER_DIALOGUES = {
+  himachal: {
+    speaker: 'Mohanlal',
+    role: 'Gaddi shepherd',
+    quote: 'The route is not one road. It is the season changing under our feet.',
+    conversation: [
+      'Mohanlal: The route is not one road. It is the season changing under our feet.',
+      'Interviewer: And the flock knows when it is time to move?',
+      'Mohanlal: Before we do. They feel the grass, the cold, and the distance ahead.'
+    ]
+  },
+  bharmour: {
+    speaker: 'Mohanlal',
+    role: 'Shepherd from Bharmour',
+    quote: 'Before we climb, every animal has to be ready for the mountain.',
+    conversation: [
+      'Mohanlal: Before we climb, every animal has to be ready for the mountain.',
+      'Mohanlal: We shear them, wash them, and check the flock one by one.'
+    ]
+  },
+  kugti: {
+    speaker: 'Mohanlal',
+    role: 'On the route to the high pastures',
+    quote: 'A familiar pass can still ask a new question every year.',
+    conversation: [
+      'Mohanlal: A familiar pass can still ask a new question every year.',
+      'Mohanlal: The snow, the water, and the animals are never exactly the same.'
+    ]
+  },
+  'kartik-swami-temple': {
+    speaker: 'Mohanlal',
+    role: 'At Kartik Swami Temple',
+    quote: 'We pause here before the route opens toward the higher valleys.',
+    conversation: [
+      'Mohanlal: We pause here before the route opens toward the higher valleys.',
+      'Mohanlal: A journey also needs prayer, not only provisions.'
+    ]
+  },
+  tandi: {
+    speaker: 'Mohanlal',
+    role: 'At the valley crossing',
+    quote: 'Here the flock can rest. The next climb will take everything from them again.',
+    conversation: [
+      'Mohanlal: Here the flock can rest. The next climb will take everything from them again.',
+      'Interviewer: Is this where the landscape begins to feel different?',
+      'Mohanlal: The land becomes wider, but the work becomes no lighter.'
+    ]
+  },
+  darcha: {
+    speaker: 'Mohanlal',
+    role: 'In the summer pastures',
+    quote: 'The flock spreads out here, but we still keep each other in sight.',
+    conversation: [
+      'Mohanlal: The flock spreads out here, but we still keep each other in sight.',
+      'Mohanlal: These weeks are for grazing, lambing, and repairing what the journey has worn down.'
+    ]
+  },
+  'full-route': {
+    speaker: 'Mohanlal',
+    role: 'Looking back on the annual cycle',
+    quote: 'When we return, the path is changed by the time we have spent on it.',
+    conversation: [
+      'Mohanlal: When we return, the path is changed by the time we have spent on it.',
+      'Mohanlal: We carry the mountain home with us, even when the flock comes down.'
+    ]
+  }
+};
 
 
 // ============================================================
@@ -318,9 +404,9 @@ const STORY = [
       'Himachal Pradesh',
 
     text:
-      `The Gaddi are a traditional agro-pastoralist community 
-      whose life revolves around rearing sheep and goats in the Western Himalaya. 
-      During summer, they move their flocks to high-altitude pastures while in winter, 
+      `The Gaddi are a traditional agro-pastoralist community
+      whose life revolves around rearing sheep and goats in the Western Himalaya.
+      During summer, they move their flocks to high-altitude pastures while in winter,
       they descend toward the lower hills and plains. `,
 
     center: [
@@ -473,8 +559,8 @@ const STORY = [
 
     text:
       `Along Mohanlal’s route, the Kartik Swami Temple stands as both a spiritual stop and a cultural anchor.
-      Here, animal sacrifices, prayers, and seasonal festivals 
-      like Lohri ki Sankranti and Veeru ki Sankranti mark an important moment in the 
+      Here, animal sacrifices, prayers, and seasonal festivals
+      like Lohri ki Sankranti and Veeru ki Sankranti mark an important moment in the
       pastoralists’ annual migration cycle.
 .`,
 
@@ -533,8 +619,8 @@ const STORY = [
       stunted blue pines and low shrubs across the slopes.`,
 
     detail:
-      `Tandi, at the confluence of the Chandra and Bhaga rivers forming the Chenab, 
-      has historically been an important tri-junction on the migration route connecting Leh, Killar, and Kaza. 
+      `Tandi, at the confluence of the Chandra and Bhaga rivers forming the Chenab,
+      has historically been an important tri-junction on the migration route connecting Leh, Killar, and Kaza.
       The gentle slopes here give Mohanlal and his flock a chance to rest and graze before the final journey into the higher summer pastures
     `,
 
@@ -640,26 +726,26 @@ const STORY = [
       'Bharmour → Darcha',
 
     text:
-      `After the summer grazing, Mohanlal begins his journey back to the home village and then to the winter pastures, 
-      moving through the high and low elevations during September and October to complete his annual cycle. 
-      Viewing the full route highlights how a single community’s migration shapes its entire way of life.`, 
-      
+      `After the summer grazing, Mohanlal begins his journey back to the home village and then to the winter pastures,
+      moving through the high and low elevations during September and October to complete his annual cycle.
+      Viewing the full route highlights how a single community’s migration shapes its entire way of life.`,
+
     detail:
-    `For the Gaddi pastoralists, transhumance is a living connection between people, animals, 
-      landscapes, and traditions. Through their seasonal movements, shepherds sustain local economies, 
+    `For the Gaddi pastoralists, transhumance is a living connection between people, animals,
+      landscapes, and traditions. Through their seasonal movements, shepherds sustain local economies,
       maintain cultural heritage, and care for fragile mountain ecosystems.
  `,
 
     center: [
-      76.958654,
-      32.531085
+      76.923171,
+      32.542367
     ],
 
-    zoom: 10.411,
+    zoom: 10.042,
 
-    pitch: 29.5,
+    pitch: 30.5,
 
-    bearing: -60.86,
+    bearing: -68.06,
 
     routeProgress: 1,
 
@@ -673,13 +759,22 @@ const STORY = [
   }
 
 ];
+*/
 
 
 // ============================================================
 // STATE
 // ============================================================
 
+let STORY = HIMACHAL_STORY;
+
+let activeDialogues = HIMACHAL_DIALOGUES;
+
+let activeStoryId = 'himachal';
+
 let atlasMode = true;
+
+let selectedOverviewState = null;
 
 let currentStoryIndex = 0;
 
@@ -688,6 +783,14 @@ let cameraAnimating = false;
 let storyReady = false;
 
 let scrollLocked = false;
+
+let exploreState = 'story';
+
+let exploreSnapshot = null;
+
+let exploreTransitionToken = 0;
+
+let exploreThreeLayer = null;
 
 let templeMarker = null;
 
@@ -704,6 +807,10 @@ let routeLength = 0;
 let flockProgress = 0;
 
 let flockAnimationFrame = null;
+
+let route3dLayer = null;
+
+let route3dVisible = false;
 
 const FLOCK_START_PROGRESS =
   0.003;
@@ -802,6 +909,9 @@ const map = new maplibregl.Map({
         tileSize:
           256,
 
+        maxzoom:
+          17,
+
         attribution:
           'Esri, Maxar, Earthstar Geographics'
       },
@@ -823,7 +933,7 @@ const map = new maplibregl.Map({
           'terrarium',
 
         maxzoom:
-          15
+          14
 
       }
 
@@ -858,7 +968,7 @@ const map = new maplibregl.Map({
             0.91,
 
           'raster-fade-duration':
-            600
+            0
 
         }
 
@@ -882,7 +992,16 @@ const map = new maplibregl.Map({
     ATLAS_CAMERA.bearing,
 
   antialias:
-    true
+    true,
+
+  fadeDuration:
+    0,
+
+  refreshExpiredTiles:
+    false,
+
+  maxTileCacheSize:
+    512
 
 });
 
@@ -896,6 +1015,12 @@ map.setMinZoom(3.5);
 map.setMaxZoom(16);
 
 map.setMaxPitch(68);
+
+if (
+  typeof map.setPrefetchZoomDelta === 'function'
+) {
+  map.setPrefetchZoomDelta(2);
+}
 
 
 // ============================================================
@@ -911,8 +1036,8 @@ map.addControl(
 );
 
 
-// ============================================================
-// CAMERA COMPOSER
+/* ============================================================
+// LEGACY CAMERA COMPOSER MOVED TO src/atlas/camera-composer.js
 //
 // Development-only tool. Open the app with ?composer=1 to
 // compose and copy refined camera stops without changing the
@@ -1239,6 +1364,19 @@ if (
   createCameraComposer();
 
 }
+*/
+
+
+if (
+  new URLSearchParams(
+    window.location.search
+  ).has('composer')
+) {
+  createCameraComposer({
+    map,
+    chapters: STORY
+  });
+}
 
 
 // ============================================================
@@ -1268,8 +1406,7 @@ atlasHome.innerHTML = `
     </h1>
 
     <p>
-      Explore how pastoral communities move through India's
-      diverse landscapes, connecting seasonal grazing grounds,
+      Enjoy views of the diverse landscapes and explore how pastoral communities migrate through India, connecting seasonal grazing grounds,
       settlements and ecosystems.
     </p>
 
@@ -1297,6 +1434,7 @@ const caseStudyMarkers =
 
 function createCaseStudyMarkers() {
 
+
   CASE_STUDIES.forEach(
     (caseStudy) => {
 
@@ -1306,6 +1444,7 @@ function createCaseStudyMarkers() {
 
       marker.className =
         caseStudy.active
+        || caseStudy.overviewOnly
           ? 'case-study-marker active'
           : 'case-study-marker future';
 
@@ -1332,10 +1471,15 @@ function createCaseStudyMarkers() {
 
       `;
 
+      const markerLabel = marker.querySelector(
+        '.case-study-label'
+      );
+      if (caseStudy.labelOffset && markerLabel) {
+        markerLabel.style.transform = `translate(${caseStudy.labelOffset[0]}px, ${caseStudy.labelOffset[1]}px)`;
+      }
 
-      if (
-        caseStudy.active
-      ) {
+
+      if (caseStudy.active) {
 
         marker.setAttribute(
           'aria-label',
@@ -1347,20 +1491,29 @@ function createCaseStudyMarkers() {
           'click',
           () => {
 
-            enterHimachalCaseStudy();
+            enterStateCaseStudy(caseStudy);
 
           }
         );
 
       }
-
-
+      else if (caseStudy.overviewOnly) {
+        marker.setAttribute(
+          'aria-label',
+          `View ${caseStudy.state} boundary`
+        );
+        marker.addEventListener(
+          'click',
+          () => enterStateCaseStudy(caseStudy)
+        );
+      }
       else {
 
         marker.disabled =
           true;
 
       }
+
 
 
       const mapMarker =
@@ -1375,7 +1528,7 @@ function createCaseStudyMarkers() {
         })
 
           .setLngLat(
-            caseStudy.center
+            caseStudy.markerCenter || caseStudy.center
           )
 
           .addTo(
@@ -1428,24 +1581,60 @@ storyPanel.innerHTML = `
 
     <div id="story-location"></div>
 
+    <section id="story-dialogue" hidden>
+      <div class="story-dialogue-label">Voice from the route</div>
+      <blockquote id="story-dialogue-quote"></blockquote>
+      <div id="story-dialogue-attribution"></div>
+      <button id="story-dialogue-toggle" type="button">Read conversation</button>
+      <div id="story-dialogue-expanded" hidden></div>
+    </section>
+
     <p id="story-text"></p>
 
     <div id="story-media"></div>
 
     <p id="story-detail"></p>
 
+    <button
+      id="explore-bharmour"
+      type="button"
+      hidden
+    >
+      <span>Explore Bharmour</span>
+      <span class="explore-button-arrow" aria-hidden="true">↗</span>
+    </button>
+
 
     <div class="story-progress">
 
-      <span id="story-number"></span>
+      <div
+        class="story-progress-track"
+        role="tablist"
+        aria-label="Story stops"
+      >
 
-      <div class="story-progress-line">
+        <div class="story-progress-line">
 
-        <div id="story-progress-fill"></div>
+          <div id="story-progress-fill"></div>
+
+        </div>
+
+        ${STORY.map(
+          (chapter, index) => `
+            <button
+              class="story-progress-stop"
+              type="button"
+              role="tab"
+              data-story-index="${index}"
+              aria-label="Go to ${chapter.location}"
+              aria-selected="${index === 0}"
+            >
+              <span>${String(index + 1).padStart(2, '0')}</span>
+            </button>
+          `
+        ).join('')}
 
       </div>
-
-      <span id="story-total"></span>
 
     </div>
 
@@ -1462,6 +1651,456 @@ storyPanel.innerHTML = `
 document.body.appendChild(
   storyPanel
 );
+
+
+const exploreModePanel =
+  document.createElement('aside');
+
+
+exploreModePanel.id =
+  'explore-mode-panel';
+
+
+exploreModePanel.setAttribute(
+  'aria-hidden',
+  'true'
+);
+
+
+exploreModePanel.innerHTML = `
+
+  <div class="explore-mode-label">
+    <span class="explore-mode-pulse" aria-hidden="true"></span>
+    Bharmour · Explore Mode
+  </div>
+
+  <p class="explore-mode-guidance">
+    Explore this place at your own pace.
+  </p>
+
+  <button
+    id="return-to-story"
+    type="button"
+  >
+    <span>Return to Story</span>
+    <span aria-hidden="true">←</span>
+  </button>
+
+`;
+
+
+document.body.appendChild(
+  exploreModePanel
+);
+
+
+// ============================================================
+// STORY IMAGE VIEWER
+// ============================================================
+
+const imageViewer =
+  document.createElement('div');
+
+
+imageViewer.id =
+  'image-viewer';
+
+
+imageViewer.setAttribute(
+  'aria-hidden',
+  'true'
+);
+
+
+imageViewer.innerHTML = `
+
+  <div class="image-viewer-backdrop"></div>
+
+  <div
+    class="image-viewer-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Expanded story images"
+  >
+
+    <button
+      class="image-viewer-close"
+      type="button"
+      aria-label="Close image viewer"
+    >
+      ×
+    </button>
+
+    <div class="image-viewer-heading">
+      <span id="image-viewer-location"></span>
+      <span id="image-viewer-count"></span>
+    </div>
+
+    <div class="image-viewer-stage">
+
+      <button
+        class="image-viewer-arrow image-viewer-previous"
+        type="button"
+        aria-label="Previous image"
+      >
+        ‹
+      </button>
+
+      <img
+        id="image-viewer-image"
+        alt=""
+      >
+
+      <button
+        class="image-viewer-arrow image-viewer-next"
+        type="button"
+        aria-label="Next image"
+      >
+        ›
+      </button>
+
+    </div>
+
+    <div
+      class="image-viewer-dots"
+      aria-label="Image selection"
+    ></div>
+
+  </div>
+
+`;
+
+
+document.body.appendChild(
+  imageViewer
+);
+
+
+const imageViewerImage =
+  imageViewer.querySelector(
+    '#image-viewer-image'
+  );
+
+
+const imageViewerLocation =
+  imageViewer.querySelector(
+    '#image-viewer-location'
+  );
+
+
+const imageViewerCount =
+  imageViewer.querySelector(
+    '#image-viewer-count'
+  );
+
+
+const imageViewerDots =
+  imageViewer.querySelector(
+    '.image-viewer-dots'
+  );
+
+
+const imageViewerClose =
+  imageViewer.querySelector(
+    '.image-viewer-close'
+  );
+
+
+const imageViewerPrevious =
+  imageViewer.querySelector(
+    '.image-viewer-previous'
+  );
+
+
+const imageViewerNext =
+  imageViewer.querySelector(
+    '.image-viewer-next'
+  );
+
+
+let imageViewerImages = [];
+let imageViewerIndex = 0;
+let imageViewerTouchStartX = 0;
+
+
+function renderImageViewerImage(
+  direction = 0
+) {
+
+  const image =
+    imageViewerImages[
+      imageViewerIndex
+    ];
+
+  imageViewerImage.classList.remove(
+    'image-viewer-image-next',
+    'image-viewer-image-previous'
+  );
+
+  if (direction !== 0) {
+    // Restart the entrance animation when moving between images.
+    void imageViewerImage.offsetWidth;
+
+    imageViewerImage.classList.add(
+      direction > 0
+        ? 'image-viewer-image-next'
+        : 'image-viewer-image-previous'
+    );
+  }
+
+  imageViewerImage.src =
+    image.src;
+
+  imageViewerImage.alt =
+    image.alt;
+
+  imageViewerCount.textContent =
+    `${String(imageViewerIndex + 1).padStart(2, '0')} / ${String(imageViewerImages.length).padStart(2, '0')}`;
+
+  imageViewerDots.innerHTML =
+    imageViewerImages.map(
+      (item, index) => `
+        <button
+          class="image-viewer-dot${index === imageViewerIndex ? ' active' : ''}"
+          type="button"
+          aria-label="Show image ${index + 1}"
+          aria-current="${index === imageViewerIndex}"
+          data-image-index="${index}"
+        ></button>
+      `
+    ).join('');
+
+  imageViewerDots.querySelectorAll(
+    '.image-viewer-dot'
+  ).forEach(
+    (dot) => {
+      dot.addEventListener(
+        'click',
+        () => {
+          imageViewerIndex = Number(
+            dot.dataset.imageIndex
+          );
+
+          renderImageViewerImage();
+        }
+      );
+    }
+  );
+
+  imageViewerPrevious.hidden =
+    imageViewerImages.length < 2;
+
+  imageViewerNext.hidden =
+    imageViewerImages.length < 2;
+
+  imageViewerDots.hidden =
+    imageViewerImages.length < 2;
+
+}
+
+
+function openImageViewer(
+  images,
+  index
+) {
+
+  imageViewerImages =
+    images;
+
+  imageViewerIndex =
+    index;
+
+  imageViewerLocation.textContent =
+    STORY[currentStoryIndex].location;
+
+  renderImageViewerImage();
+
+  imageViewer.classList.add(
+    'visible'
+  );
+
+  imageViewer.setAttribute(
+    'aria-hidden',
+    'false'
+  );
+
+  document.body.classList.add(
+    'image-viewer-open'
+  );
+
+  imageViewerClose.focus();
+
+}
+
+
+function closeImageViewer() {
+
+  imageViewer.classList.remove(
+    'visible'
+  );
+
+  imageViewer.setAttribute(
+    'aria-hidden',
+    'true'
+  );
+
+  document.body.classList.remove(
+    'image-viewer-open'
+  );
+
+}
+
+
+function moveImageViewer(
+  direction
+) {
+
+  if (
+    imageViewerImages.length < 2
+  ) {
+    return;
+  }
+
+  imageViewerIndex = (
+    imageViewerIndex + direction + imageViewerImages.length
+  ) % imageViewerImages.length;
+
+  renderImageViewerImage(
+    direction
+  );
+
+}
+
+
+imageViewerClose.addEventListener(
+  'click',
+  closeImageViewer
+);
+
+
+imageViewer.querySelector(
+  '.image-viewer-backdrop'
+).addEventListener(
+  'click',
+  closeImageViewer
+);
+
+
+imageViewerPrevious.addEventListener(
+  'click',
+  () => moveImageViewer(-1)
+);
+
+
+imageViewerNext.addEventListener(
+  'click',
+  () => moveImageViewer(1)
+);
+
+
+imageViewer.addEventListener(
+  'keydown',
+  (event) => {
+    if (event.key === 'Escape') {
+      closeImageViewer();
+    }
+
+    if (event.key === 'ArrowLeft') {
+      moveImageViewer(-1);
+    }
+
+    if (event.key === 'ArrowRight') {
+      moveImageViewer(1);
+    }
+  }
+);
+
+
+imageViewer.addEventListener(
+  'touchstart',
+  (event) => {
+    imageViewerTouchStartX =
+      event.changedTouches[0].clientX;
+  },
+  {
+    passive: true
+  }
+);
+
+
+imageViewer.addEventListener(
+  'touchend',
+  (event) => {
+    const distance =
+      event.changedTouches[0].clientX
+      - imageViewerTouchStartX;
+
+    if (Math.abs(distance) > 45) {
+      moveImageViewer(
+        distance < 0 ? 1 : -1
+      );
+    }
+  },
+  {
+    passive: true
+  }
+);
+
+
+function bindStoryImages(
+  chapter
+) {
+
+  const images = [
+    chapter.image,
+    chapter.secondImage
+  ].filter(Boolean).map(
+    (src, index) => ({
+      src,
+      alt: `${chapter.location} image ${index + 1}`
+    })
+  );
+
+  mediaElement.querySelectorAll(
+    '.story-image'
+  ).forEach(
+    (image, index) => {
+      image.setAttribute(
+        'role',
+        'button'
+      );
+
+      image.setAttribute(
+        'tabindex',
+        '0'
+      );
+
+      const open = () => openImageViewer(
+        images,
+        index
+      );
+
+      image.addEventListener(
+        'click',
+        open
+      );
+
+      image.addEventListener(
+        'keydown',
+        (event) => {
+          if (
+            event.key === 'Enter'
+            || event.key === ' '
+          ) {
+            event.preventDefault();
+            open();
+          }
+        }
+      );
+    }
+  );
+
+}
 
 
 // ============================================================
@@ -1599,6 +2238,36 @@ const locationElement =
   );
 
 
+const dialogueElement =
+  document.querySelector(
+    '#story-dialogue'
+  );
+
+
+const dialogueQuoteElement =
+  document.querySelector(
+    '#story-dialogue-quote'
+  );
+
+
+const dialogueAttributionElement =
+  document.querySelector(
+    '#story-dialogue-attribution'
+  );
+
+
+const dialogueToggle =
+  document.querySelector(
+    '#story-dialogue-toggle'
+  );
+
+
+const dialogueExpandedElement =
+  document.querySelector(
+    '#story-dialogue-expanded'
+  );
+
+
 const textElement =
   document.querySelector(
     '#story-text'
@@ -1617,22 +2286,35 @@ const mediaElement =
   );
 
 
-const numberElement =
-  document.querySelector(
-    '#story-number'
-  );
-
-
-const totalElement =
-  document.querySelector(
-    '#story-total'
-  );
-
-
 const progressFill =
   document.querySelector(
     '#story-progress-fill'
   );
+
+
+const progressStops = [
+  ...document.querySelectorAll(
+    '.story-progress-stop'
+  )
+];
+
+
+function updateProgressStopsForStory() {
+  progressStops.forEach(
+    (stop, index) => {
+      const chapter = STORY[index];
+      stop.hidden = !chapter;
+      if (chapter) {
+        stop.setAttribute(
+          'aria-label',
+          `Go to ${chapter.location}`
+        );
+        stop.querySelector('span').textContent =
+          String(index + 1).padStart(2, '0');
+      }
+    }
+  );
+}
 
 
 const scrollHint =
@@ -1645,6 +2327,37 @@ const backToAtlasButton =
   document.querySelector(
     '#back-to-atlas'
   );
+
+
+const storyPanelInner =
+  storyPanel.querySelector(
+    '.story-panel-inner'
+  );
+
+
+const exploreBharmourButton =
+  document.querySelector(
+    '#explore-bharmour'
+  );
+
+
+const returnToStoryButton =
+  document.querySelector(
+    '#return-to-story'
+  );
+
+
+dialogueToggle.addEventListener(
+  'click',
+  () => {
+    const expanded =
+      !dialogueExpandedElement.hidden;
+    dialogueExpandedElement.hidden = expanded;
+    dialogueToggle.textContent = expanded
+      ? 'Read conversation'
+      : 'Close conversation';
+  }
+);
 
 
 // ============================================================
@@ -1679,12 +2392,38 @@ function updateStoryPanel() {
         chapter.location || '';
 
 
+      const dialogue =
+        activeDialogues[chapter.id];
+
+      dialogueElement.hidden = !dialogue;
+      dialogueExpandedElement.hidden = true;
+      dialogueToggle.textContent = 'Read conversation';
+
+      if (dialogue) {
+        dialogueQuoteElement.textContent =
+          `“${dialogue.quote}”`;
+        dialogueAttributionElement.textContent =
+          `${dialogue.speaker} · ${dialogue.role}`;
+        dialogueExpandedElement.textContent =
+          dialogue.conversation.join('\n\n');
+      }
+      else {
+        dialogueQuoteElement.textContent = '';
+        dialogueAttributionElement.textContent = '';
+        dialogueExpandedElement.textContent = '';
+      }
+
+
       textElement.textContent =
         chapter.text || '';
 
 
       detailElement.textContent =
         chapter.detail || '';
+
+
+      exploreBharmourButton.hidden =
+        chapter.id !== 'bharmour';
 
 
       // ======================================================
@@ -1753,27 +2492,14 @@ function updateStoryPanel() {
       }
 
 
+      bindStoryImages(
+        chapter
+      );
+
+
       // ======================================================
       // PROGRESS
       // ======================================================
-
-      numberElement.textContent =
-        String(
-          currentStoryIndex + 1
-        ).padStart(
-          2,
-          '0'
-        );
-
-
-      totalElement.textContent =
-        String(
-          STORY.length
-        ).padStart(
-          2,
-          '0'
-        );
-
 
       const progress =
         (
@@ -1789,6 +2515,42 @@ function updateStoryPanel() {
 
       progressFill.style.width =
         `${progress}%`;
+
+
+      progressStops.forEach(
+        (stop, index) => {
+          const isCurrent =
+            index === currentStoryIndex;
+
+          stop.classList.toggle(
+            'active',
+            isCurrent
+          );
+
+          stop.classList.toggle(
+            'visited',
+            index <= currentStoryIndex
+          );
+
+          stop.setAttribute(
+            'aria-selected',
+            String(isCurrent)
+          );
+
+          if (isCurrent) {
+            stop.setAttribute(
+              'aria-current',
+              'step'
+            );
+          }
+          else {
+            stop.removeAttribute(
+              'aria-current'
+            );
+          }
+
+        }
+      );
 
 
       // ======================================================
@@ -1835,6 +2597,22 @@ function updateStoryPanel() {
   );
 
 }
+
+
+progressStops.forEach(
+  (stop) => {
+    stop.addEventListener(
+      'click',
+      () => {
+        goToChapter(
+          Number(
+            stop.dataset.storyIndex
+          )
+        );
+      }
+    );
+  }
+);
 
 
 // ============================================================
@@ -1900,6 +2678,61 @@ function setRouteProgressPaint(
 
   }
 
+
+  if (
+    route3dLayer
+  ) {
+    route3dLayer.setProgress(
+      progress
+    );
+  }
+
+}
+
+function setAutumnRouteProgressPaint(progress) {
+
+  if (!map.getLayer('migration-route')) {
+    return;
+  }
+
+  if (!Number.isFinite(progress)) {
+    return;
+  }
+
+  const p = Math.max(0, Math.min(1, progress));
+
+  // Keep the gradient stops strictly increasing.
+  const start = Math.max(0, p - 0.001);
+
+  const gradient = [
+    'interpolate',
+    ['linear'],
+    ['line-progress'],
+
+    0, 'rgba(91, 76, 56, 0)',
+
+    start, 'rgba(91, 76, 56, 0)',
+
+    p, '#D9D9D9',
+
+    1, '#D9D9D9'
+  ];
+
+  map.setPaintProperty(
+    'migration-route',
+    'line-gradient',
+    gradient
+  );
+
+  if (map.getLayer('migration-route-highlight')) {
+
+    map.setPaintProperty(
+      'migration-route-highlight',
+      'line-gradient',
+      gradient
+    );
+
+  }
 }
 
 function updateRouteProgress(
@@ -1937,6 +2770,8 @@ function updateRouteProgress(
   }
 
   const startProgress = flockProgress;
+  const isAutumnReturn =
+  options.migrationPhase === 'autumn-return';
 
   if (
     options.animate !== false
@@ -1945,7 +2780,7 @@ function updateRouteProgress(
 
     const startedAt = performance.now();
     const duration = options.duration
-      || Math.min(
+       Math.min(
         1800,
         Math.max(700, Math.abs(p - startProgress) * 2600)
       );
@@ -1955,9 +2790,14 @@ function updateRouteProgress(
       const eased = elapsed * elapsed * (3 - 2 * elapsed);
       const value = startProgress + (p - startProgress) * eased;
 
-      setRouteProgressPaint(value);
-      flockProgress = value;
-      updateFlockPosition(value);
+      if (isAutumnReturn) {
+  setAutumnRouteProgressPaint(value);
+} else {
+  setRouteProgressPaint(value);
+}
+
+flockProgress = value;
+updateFlockPosition(value);
 
       if (elapsed < 1) {
         flockAnimationFrame = requestAnimationFrame(animateFlock);
@@ -2053,6 +2893,14 @@ function updateRouteProgress(
   flockProgress = p;
   updateFlockPosition(p);
 
+  if (
+    route3dLayer
+  ) {
+    route3dLayer.setProgress(
+      p
+    );
+  }
+
 }
 
 
@@ -2102,7 +2950,9 @@ function getRouteCoordinate(
 
 
 function getRouteProgressForCoordinate(
-  coordinate
+  coordinate,
+  minProgress = 0,
+  maxProgress = 1
 ) {
 
   if (
@@ -2123,6 +2973,19 @@ function getRouteProgressForCoordinate(
     index < routeCoordinates.length;
     index += 1
   ) {
+
+    const segmentStartProgress =
+  routeDistances[index - 1] / routeLength;
+
+const segmentEndProgress =
+  routeDistances[index] / routeLength;
+
+if (
+  segmentEndProgress < minProgress ||
+  segmentStartProgress > maxProgress
+) {
+  continue;
+}
 
     const start = routeCoordinates[index - 1];
     const end = routeCoordinates[index];
@@ -2164,16 +3027,85 @@ function getRouteProgressForCoordinate(
 }
 
 
-function getStoryRouteProgress(
-  chapter
-) {
+function inspectRouteProgress(coordinate) {
 
-  return getRouteProgressForCoordinate(
-    chapter.routeStop
-  )
-  ?? chapter.routeProgress;
+  if (!Array.isArray(coordinate) || coordinate.length !== 2) {
+    console.warn('Invalid coordinate:', coordinate);
+    return;
+  }
 
+  const matches = [];
+
+  for (let i = 0; i < routeCoordinates.length; i++) {
+
+    const point = routeCoordinates[i];
+
+    const distance = Math.hypot(
+      (point[0] - coordinate[0]) *
+        Math.cos(coordinate[1] * Math.PI / 180),
+      point[1] - coordinate[1]
+    );
+
+    matches.push({
+      index: i,
+      progress: routeDistances[i] / routeLength,
+      distance
+    });
+  }
+
+  matches.sort((a, b) => a.distance - b.distance);
+
+  console.table(matches.slice(0, 15));
 }
+
+
+function getStoryRouteProgress(chapter) {
+
+  // Summer overview uses exactly the same position as Darcha.
+  if (chapter.id === 'full-route') {
+
+    const darcha = STORY.find(
+      item => item.id === 'darcha'
+    );
+
+    if (darcha) {
+      return getStoryRouteProgress(darcha);
+    }
+
+    return null;
+  }
+
+  const coordinate = chapter.routeStop;
+
+  const hasValidCoordinate =
+    Array.isArray(coordinate) &&
+    coordinate.length === 2 &&
+    coordinate.every(Number.isFinite);
+
+  const calculatedProgress = hasValidCoordinate
+    ? getRouteProgressForCoordinate(
+        coordinate,
+        chapter.routeProgressMin ?? 0,
+        chapter.routeProgressMax ?? 1
+      )
+    : null;
+
+  if (Number.isFinite(calculatedProgress)) {
+    return Math.max(0, Math.min(1, calculatedProgress));
+  }
+
+  if (Number.isFinite(chapter.routeProgress)) {
+    return Math.max(0, Math.min(1, chapter.routeProgress));
+  }
+
+  console.warn(
+    'No valid route progress for chapter:',
+    chapter.id
+  );
+
+  return null;
+}
+window.inspectRouteProgress = inspectRouteProgress;
 
 
 function updateFlockPosition(
@@ -2278,6 +3210,660 @@ function prepareRouteCoordinates(
 
 
 // ============================================================
+// RAISED 3D ROUTE
+// ============================================================
+
+function createRaisedRouteLayer() {
+
+  const getRoutePoints = () => routeCoordinates.map(
+    (coordinate, index) => {
+      const elevation = map.queryTerrainElevation(
+        coordinate,
+        {
+          exaggerated: true
+        }
+      ) || 0;
+
+      const mercator =
+        maplibregl.MercatorCoordinate.fromLngLat(
+          coordinate,
+          elevation + 28
+        );
+
+      const previous =
+        routeCoordinates[Math.max(0, index - 1)];
+
+      const next =
+        routeCoordinates[Math.min(
+          routeCoordinates.length - 1,
+          index + 1
+        )];
+
+      const previousMercator =
+        maplibregl.MercatorCoordinate.fromLngLat(
+          previous,
+          0
+        );
+
+      const nextMercator =
+        maplibregl.MercatorCoordinate.fromLngLat(
+          next,
+          0
+        );
+
+      const tangentX =
+        nextMercator.x - previousMercator.x;
+
+      const tangentY =
+        nextMercator.y - previousMercator.y;
+
+      const tangentLength = Math.sqrt(
+        tangentX * tangentX
+        + tangentY * tangentY
+      ) || 1;
+
+      return {
+        x: mercator.x,
+        y: mercator.y,
+        z: mercator.z,
+        normalX: -tangentY / tangentLength,
+        normalY: tangentX / tangentLength,
+        meterScale:
+          mercator.meterInMercatorCoordinateUnits(),
+        progress:
+          routeLength === 0
+            ? 0
+            : routeDistances[index] / routeLength
+      };
+    }
+  );
+  console.log('=== DARCHA ROUTE PROGRESS ===');
+
+inspectRouteProgress([
+  77.19755939568283,
+  32.67493238488826
+]);
+
+console.log('=== HADSAR ROUTE PROGRESS ===');
+
+inspectRouteProgress([
+    76.61126,
+    32.45489
+
+]);
+
+
+  let routePoints =
+    getRoutePoints();
+
+
+  const tubeData = [
+    {
+      radius: 11,
+      color: [0.08, 0.055, 0.025],
+      alpha: 0.28
+    },
+    {
+      radius: 7,
+      color: [0.23, 0.12, 0.035],
+      alpha: 0.92
+    },
+    {
+      radius: 3.5,
+      color: [0.93, 0.57, 0.16],
+      alpha: 1
+    }
+  ];
+
+
+  const buildTube = (
+    radius
+  ) => {
+    const vertices = [];
+    const ringSegments = 8;
+
+    const rings = routePoints.map(
+      (point, index) => {
+        const previous = routePoints[
+          Math.max(0, index - 1)
+        ];
+
+        const next = routePoints[
+          Math.min(
+            routePoints.length - 1,
+            index + 1
+          )
+        ];
+
+        let tangentX = next.x - previous.x;
+        let tangentY = next.y - previous.y;
+        let tangentZ = next.z - previous.z;
+
+        const tangentLength = Math.sqrt(
+          tangentX * tangentX
+          + tangentY * tangentY
+          + tangentZ * tangentZ
+        ) || 1;
+
+        tangentX /= tangentLength;
+        tangentY /= tangentLength;
+        tangentZ /= tangentLength;
+
+        let sideX = tangentY;
+        let sideY = -tangentX;
+        let sideZ = 0;
+
+        const sideLength = Math.sqrt(
+          sideX * sideX
+          + sideY * sideY
+        ) || 1;
+
+        sideX /= sideLength;
+        sideY /= sideLength;
+
+        const normalX =
+          sideY * tangentZ - sideZ * tangentY;
+        const normalY =
+          sideZ * tangentX - sideX * tangentZ;
+        const normalZ =
+          sideX * tangentY - sideY * tangentX;
+
+        return Array.from(
+          {
+            length: ringSegments
+          },
+          (_, segment) => {
+            const angle =
+              segment / ringSegments * Math.PI * 2;
+            const radialX =
+              sideX * Math.cos(angle)
+              + normalX * Math.sin(angle);
+            const radialY =
+              sideY * Math.cos(angle)
+              + normalY * Math.sin(angle);
+            const radialZ =
+              sideZ * Math.cos(angle)
+              + normalZ * Math.sin(angle);
+            const offset =
+              radius * point.meterScale;
+
+            return {
+              x: point.x + radialX * offset,
+              y: point.y + radialY * offset,
+              z: point.z + radialZ * offset,
+              normalX: radialX,
+              normalY: radialY,
+              normalZ: radialZ,
+              progress: point.progress
+            };
+          }
+        );
+      }
+    );
+
+    for (
+      let index = 1;
+      index < rings.length;
+      index += 1
+    ) {
+      const previousRing = rings[index - 1];
+      const currentRing = rings[index];
+
+      for (
+        let segment = 0;
+        segment < ringSegments;
+        segment += 1
+      ) {
+        const nextSegment =
+          (segment + 1) % ringSegments;
+        const corners = [
+          previousRing[segment],
+          currentRing[segment],
+          currentRing[nextSegment],
+          previousRing[nextSegment]
+        ];
+
+        [
+          corners[0],
+          corners[1],
+          corners[2],
+          corners[0],
+          corners[2],
+          corners[3]
+        ].forEach(
+          (vertex) => {
+            vertices.push(
+              vertex.x,
+              vertex.y,
+              vertex.z,
+              vertex.normalX,
+              vertex.normalY,
+              vertex.normalZ,
+              vertex.progress
+            );
+          }
+        );
+      }
+    }
+
+    return new Float32Array(
+      vertices
+    );
+  };
+
+
+  const layer = {
+    id: 'gaddi-route-3d',
+
+    type: 'custom',
+
+    renderingMode: '3d',
+
+    onAdd(mapInstance, gl) {
+      this.map = mapInstance;
+      this.gl = gl;
+
+      const vertexShader = gl.createShader(
+        gl.VERTEX_SHADER
+      );
+
+      gl.shaderSource(
+        vertexShader,
+        `
+          attribute vec3 a_position;
+          attribute vec3 a_normal;
+          attribute float a_progress;
+          uniform mat4 u_matrix;
+          varying float v_progress;
+          varying vec3 v_normal;
+
+          void main() {
+            gl_Position = u_matrix * vec4(a_position, 1.0);
+            v_progress = a_progress;
+            v_normal = a_normal;
+          }
+        `
+      );
+
+      gl.compileShader(
+        vertexShader
+      );
+
+      const fragmentShader = gl.createShader(
+        gl.FRAGMENT_SHADER
+      );
+
+      gl.shaderSource(
+        fragmentShader,
+        `
+          precision highp float;
+
+          uniform float u_progress;
+          uniform vec3 u_color;
+          uniform float u_alpha;
+
+          varying float v_progress;
+          varying vec3 v_normal;
+
+          void main() {
+            if (v_progress > u_progress) {
+              discard;
+            }
+
+            float head = 1.0 - smoothstep(
+              0.0,
+              0.045,
+              abs(v_progress - u_progress)
+            );
+
+            vec3 color = mix(
+              u_color,
+              vec3(1.0, 0.82, 0.42),
+              head * 0.58
+            );
+
+            vec3 lightDirection = normalize(
+              vec3(-0.45, -0.55, 0.9)
+            );
+
+            float lighting = 0.38 + 0.62 * max(
+              dot(
+                normalize(v_normal),
+                lightDirection
+              ),
+              0.0
+            );
+
+            gl_FragColor = vec4(
+              color * lighting,
+              u_alpha + head * 0.16
+            );
+          }
+        `
+      );
+
+      gl.compileShader(
+        fragmentShader
+      );
+
+      this.program = gl.createProgram();
+
+      gl.attachShader(
+        this.program,
+        vertexShader
+      );
+
+      gl.attachShader(
+        this.program,
+        fragmentShader
+      );
+
+      gl.linkProgram(
+        this.program
+      );
+
+      this.positionLocation =
+        gl.getAttribLocation(
+          this.program,
+          'a_position'
+        );
+
+      this.normalLocation =
+        gl.getAttribLocation(
+          this.program,
+          'a_normal'
+        );
+
+      this.progressLocation =
+        gl.getAttribLocation(
+          this.program,
+          'a_progress'
+        );
+
+      this.matrixLocation =
+        gl.getUniformLocation(
+          this.program,
+          'u_matrix'
+        );
+
+      this.routeProgressLocation =
+        gl.getUniformLocation(
+          this.program,
+          'u_progress'
+        );
+
+      this.colorLocation =
+        gl.getUniformLocation(
+          this.program,
+          'u_color'
+        );
+
+      this.alphaLocation =
+        gl.getUniformLocation(
+          this.program,
+          'u_alpha'
+        );
+
+      this.buffers = tubeData.map(
+        (tube) => {
+          const buffer = gl.createBuffer();
+          const data = buildTube(
+            tube.radius
+          );
+
+          gl.bindBuffer(
+            gl.ARRAY_BUFFER,
+            buffer
+          );
+
+          gl.bufferData(
+            gl.ARRAY_BUFFER,
+            data,
+            gl.STATIC_DRAW
+          );
+
+          return {
+            ...tube,
+            buffer,
+            vertexCount: data.length / 7
+          };
+        }
+      );
+
+      gl.bindBuffer(
+        gl.ARRAY_BUFFER,
+        null
+      );
+    },
+
+    setProgress(progress) {
+      this.progress = progress;
+      map.triggerRepaint();
+    },
+
+    setVisible(visible) {
+      this.visible = visible;
+      map.triggerRepaint();
+    },
+
+    refreshTerrain() {
+      routePoints =
+        getRoutePoints();
+
+      if (
+        !this.buffers
+      ) {
+        return;
+      }
+
+      this.buffers.forEach(
+        (tube) => {
+          const data = buildTube(
+            tube.radius
+          );
+
+          this.gl.bindBuffer(
+            this.gl.ARRAY_BUFFER,
+            tube.buffer
+          );
+
+          this.gl.bufferData(
+            this.gl.ARRAY_BUFFER,
+            data,
+            this.gl.STATIC_DRAW
+          );
+        }
+      );
+
+      this.gl.bindBuffer(
+        this.gl.ARRAY_BUFFER,
+        null
+      );
+
+      map.triggerRepaint();
+    },
+
+    progress: 0,
+
+    visible: false,
+
+    render(gl, args) {
+      if (
+        !this.visible
+        || !this.program
+        || !routePoints.length
+      ) {
+        return;
+      }
+
+      const hadDepthTest =
+        gl.isEnabled(
+          gl.DEPTH_TEST
+        );
+
+      const hadCullFace =
+        gl.isEnabled(
+          gl.CULL_FACE
+        );
+
+      const hadBlend =
+        gl.isEnabled(
+          gl.BLEND
+        );
+
+      const hadDepthWrite =
+        gl.getParameter(
+          gl.DEPTH_WRITEMASK
+        );
+
+      const matrix =
+        args.defaultProjectionData?.mainMatrix
+        || args.mainMatrix
+        || args.matrix;
+
+      gl.useProgram(
+        this.program
+      );
+
+      gl.uniformMatrix4fv(
+        this.matrixLocation,
+        false,
+        matrix
+      );
+
+      gl.uniform1f(
+        this.routeProgressLocation,
+        this.progress
+      );
+
+      gl.enable(
+        gl.BLEND
+      );
+
+      gl.blendFunc(
+        gl.SRC_ALPHA,
+        gl.ONE_MINUS_SRC_ALPHA
+      );
+
+      gl.disable(
+        gl.CULL_FACE
+      );
+
+      gl.depthMask(
+        false
+      );
+
+      this.buffers.forEach(
+        (tube) => {
+          gl.bindBuffer(
+            gl.ARRAY_BUFFER,
+            tube.buffer
+          );
+
+          gl.enableVertexAttribArray(
+            this.positionLocation
+          );
+
+          gl.vertexAttribPointer(
+            this.positionLocation,
+            3,
+            gl.FLOAT,
+            false,
+            28,
+            0
+          );
+
+          gl.enableVertexAttribArray(
+            this.normalLocation
+          );
+
+          gl.vertexAttribPointer(
+            this.normalLocation,
+            3,
+            gl.FLOAT,
+            false,
+            28,
+            12
+          );
+
+          gl.enableVertexAttribArray(
+            this.progressLocation
+          );
+
+          gl.vertexAttribPointer(
+            this.progressLocation,
+            1,
+            gl.FLOAT,
+            false,
+            28,
+            24
+          );
+
+          gl.uniform3fv(
+            this.colorLocation,
+            tube.color
+          );
+
+          gl.uniform1f(
+            this.alphaLocation,
+            tube.alpha
+          );
+
+          gl.drawArrays(
+            gl.TRIANGLES,
+            0,
+            tube.vertexCount
+          );
+        }
+      );
+
+      gl.bindBuffer(
+        gl.ARRAY_BUFFER,
+        null
+      );
+
+      gl.depthMask(
+        hadDepthWrite
+      );
+
+      if (
+        hadDepthTest
+      ) {
+        gl.enable(
+          gl.DEPTH_TEST
+        );
+      }
+
+      if (
+        hadCullFace
+      ) {
+        gl.enable(
+          gl.CULL_FACE
+        );
+      }
+
+      if (
+        hadBlend
+      ) {
+        gl.enable(
+          gl.BLEND
+        );
+      }
+      else {
+        gl.disable(
+          gl.BLEND
+        );
+      }
+    }
+  };
+
+
+  return layer;
+
+}
+
+
+// ============================================================
 // MAP LAYER VISIBILITY
 // ============================================================
 
@@ -2294,10 +3880,17 @@ function updateMapVisibility() {
   const showRoute =
     !atlasMode
     &&
+    activeStoryId === 'himachal'
+    &&
     currentStoryIndex >= 1;
+
+  const showHimachalBoundary =
+    !atlasMode
+    && activeStoryId === 'himachal';
 
   const showKugtiContext =
     !atlasMode
+    && activeStoryId === 'himachal'
     &&
     STORY[
       currentStoryIndex
@@ -2305,6 +3898,7 @@ function updateMapVisibility() {
 
   const showTandiRiver =
     !atlasMode
+    && activeStoryId === 'himachal'
     &&
     STORY[
       currentStoryIndex
@@ -2318,14 +3912,70 @@ function updateMapVisibility() {
       : 'none';
 
 
+  if (
+    route3dLayer
+  ) {
+    route3dLayer.setVisible(
+      showRoute
+    );
+  }
+
+  [
+    'himachal-boundary-fill',
+    'himachal-boundary-outline'
+  ].forEach(
+    (layerId) => {
+      if (map.getLayer(layerId)) {
+        map.setLayoutProperty(
+          layerId,
+          'visibility',
+          showHimachalBoundary ? 'visible' : 'none'
+        );
+      }
+    }
+  );
+
+  [
+    ['ladakh', 'ladakh-boundary-fill'],
+    ['ladakh', 'ladakh-boundary-outline'],
+    ['arunachal', 'arunachal-boundary-fill'],
+    ['arunachal', 'arunachal-boundary-outline']
+  ].forEach(
+    ([stateId, layerId]) => {
+      if (map.getLayer(layerId)) {
+        map.setLayoutProperty(
+          layerId,
+          'visibility',
+          (
+            atlasMode
+            && selectedOverviewState === stateId
+          )
+          || (
+            !atlasMode
+            && activeStoryId === stateId
+          )
+            ? 'visible'
+            : 'none'
+        );
+      }
+    }
+  );
+
+
   [
 
     'route-points',
     'route-labels',
+    'ispur-darcha-route-points',
+    'ispur-darcha-route-labels',
+    'individual-ladakh-points',
+    'individual-ladakh-labels',
     'migration-route-casing',
     'migration-route-base',
     'migration-route',
     'migration-route-highlight',
+    'ispur-darcha-route-casing',
+    'ispur-darcha-route',
     'shearing-location',
     'kugti-sanctuary-fill',
     'kugti-sanctuary-outline',
@@ -2487,7 +4137,8 @@ function enableExploration() {
 
 function easeCamera(
   options
-) {
+)
+{
 
   return new Promise(
     (resolve) => {
@@ -2549,6 +4200,99 @@ function easeCamera(
 
 }
 
+// ============================================================
+// CONTINUOUS CAMERA FLIGHT THROUGH WAYPOINTS
+// ============================================================
+
+function flyCameraThroughWaypoints(
+  waypoints,
+  duration = 9000
+) {
+
+  return new Promise((resolve) => {
+
+    if (waypoints.length < 2) {
+      resolve();
+      return;
+    }
+
+    const startedAt = performance.now();
+
+
+
+
+function interpolateCamera(progress) {
+
+  const segments = waypoints.length - 1;
+  const position = Math.min(
+  Math.max(progress * segments, 0),
+  segments
+);
+
+const index = Math.min(
+  Math.floor(position),
+  segments - 1
+);
+
+const t = Math.max(
+  0,
+  Math.min(1, position - index)
+);
+
+  const from = waypoints[index];
+  const to = waypoints[index + 1];
+
+
+  const lerp = (a, b, t) => a + (b - a) * t;
+
+  const bearingDifference =
+    ((to.bearing - from.bearing + 540) % 360) - 180;
+
+  return {
+    center: [
+      lerp(from.center[0], to.center[0], t),
+      lerp(from.center[1], to.center[1], t)
+    ],
+
+    zoom: lerp(from.zoom, to.zoom, t),
+
+    pitch: lerp(from.pitch, to.pitch, t),
+
+    bearing: from.bearing + bearingDifference * t
+  };
+}
+
+
+    function animate(now) {
+
+      const elapsed = now - startedAt;
+
+      const rawProgress = Math.min(
+        1,
+        elapsed / duration
+      );
+
+      // Smooth acceleration at the beginning and
+      // deceleration at the end of the complete flight.
+      const progress = rawProgress;
+
+      const camera = interpolateCamera(progress);
+
+      map.jumpTo(camera);
+
+      if (rawProgress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        resolve();
+      }
+    }
+
+    requestAnimationFrame(animate);
+
+  });
+
+}
+
 
 // ============================================================
 // SIMPLE CAMERA
@@ -2589,16 +4333,18 @@ async function simpleCameraMove(
 // ============================================================
 
 function getTravelCamera(
+
   fromIndex,
   toIndex
-) {
+) {const fromId = STORY[fromIndex]?.id;
+const toId = STORY[toIndex]?.id;
 
   // Bharmour → Kugti
 
   if (
-    fromIndex === 1
+    fromId === 'bharmour'
     &&
-    toIndex === 2
+    toId === 'kugti'
   ) {
 
     return {
@@ -2623,9 +4369,9 @@ function getTravelCamera(
   // Kugti → Kartik Swami Temple
 
   if (
-    fromIndex === 2
+    fromId === 'kugti'
     &&
-    toIndex === 3
+    toId === 'kartik-swami-temple'
   ) {
 
     return {
@@ -2647,12 +4393,12 @@ function getTravelCamera(
   }
 
 
-  // Kartik Swami Temple → Tandi
+  // Kartik Swami Temple → Kugti - Jot
 
   if (
-    fromIndex === 3
+    fromId === 'kartik-swami-temple'
     &&
-    toIndex === 4
+    toId === 'kugti-jot'
   ) {
 
     return {
@@ -2672,6 +4418,24 @@ function getTravelCamera(
     };
 
   }
+  // ======================================================
+// Kugti Jot → Tandi
+// ======================================================
+
+if (
+  fromId === 'kugti-jot'
+  &&
+  toId === 'tandi'
+) {
+
+  return {
+    zoom: 12.2,
+    pitch: 48,
+    duration1: 1400,
+    duration2: 2400
+  };
+
+}
 
 
   return {
@@ -2704,146 +4468,151 @@ async function migrationCameraMove(
 
   const destination = STORY[toIndex];
   const travel = getTravelCamera(fromIndex, toIndex);
+    // ======================================================
+  // CINEMATIC MOUNTAIN PASS — KUGTI JOT
+  // ======================================================
 
   if (
-    false
+    STORY[fromIndex]?.id === 'kartik-swami-temple' &&
+    destination.id === 'kugti-jot'
   ) {
 
-    const startCenter =
-      map.getCenter().toArray();
+    const startCenter = map.getCenter().toArray();
 
-    const startZoom =
-      map.getZoom();
+    // Temporary approach viewpoint between the temple
+    // and the mountain pass.
+    const approachCenter = [
+      startCenter[0] +
+        (destination.center[0] - startCenter[0]) * 0.55,
 
-    const startPitch =
-      map.getPitch();
+      startCenter[1] +
+        (destination.center[1] - startCenter[1]) * 0.55
+    ];
 
-    const startBearing =
-      map.getBearing();
+    // Stage 1 — Pull back and approach the mountains.
+    await easeCamera({
+      center: approachCenter,
+      zoom: 11.8,
+      pitch: 55,
+      bearing: destination.bearing,
+      duration: 2400,
+      easing: (t) => t * t * (3 - 2 * t)
+    });
 
-    const duration =
-      travel.duration1
-      + travel.duration2;
-
-    await new Promise(
-      (resolve) => {
-
-        const startedAt =
-          performance.now();
-
-        const animateCamera =
-          (now) => {
-
-            const rawProgress =
-              Math.min(
-                1,
-                (now - startedAt)
-                / duration
-              );
-
-            const easedProgress =
-              rawProgress
-              * rawProgress
-              * (3 - 2 * rawProgress);
-
-            const finalCenter = [
-              startCenter[0]
-              + (
-                destination.center[0]
-                - startCenter[0]
-              )
-              * easedProgress,
-              startCenter[1]
-              + (
-                destination.center[1]
-                - startCenter[1]
-              )
-              * easedProgress
-            ];
-
-            const liftProgress =
-              Math.min(
-                1,
-                rawProgress / 0.35
-              );
-
-            const finalProgress =
-              Math.max(
-                0,
-                (rawProgress - 0.72)
-                / 0.28
-              );
-
-            const pitch =
-              startPitch
-              + (
-                travel.pitch
-                - startPitch
-              )
-              * liftProgress
-              + (
-                destination.pitch
-                - travel.pitch
-              )
-              * finalProgress;
-
-            const zoom =
-              startZoom
-              + (
-                travel.zoom
-                - startZoom
-              )
-              * liftProgress
-              + (
-                destination.zoom
-                - travel.zoom
-              )
-              * finalProgress;
-
-            const bearing =
-              startBearing
-              + (
-                destination.bearing
-                - startBearing
-              )
-              * easedProgress;
-
-            map.jumpTo({
-              center:
-                finalCenter,
-              zoom,
-              pitch,
-              bearing
-            });
-
-            if (
-              rawProgress < 1
-            ) {
-
-              requestAnimationFrame(
-                animateCamera
-              );
-
-            }
-            else {
-
-              resolve();
-
-            }
-
-          };
-
-        requestAnimationFrame(
-          animateCamera
-        );
-
-      }
-    );
+    // Stage 2 — Move into the saved pass viewpoint.
+    await easeCamera({
+      center: destination.center,
+      zoom: destination.zoom,
+      pitch: destination.pitch,
+      bearing: destination.bearing,
+      duration: 2800,
+      easing: (t) => t * t * (3 - 2 * t)
+    });
 
     return;
-
   }
 
+// ======================================================
+// KUGTI JOT → TANDI — SMOOTH CAMERA TRANSITION
+// ======================================================
+
+if (
+  STORY[fromIndex]?.id === 'kugti-jot' &&
+  destination.id === 'tandi'
+) {
+
+  // Stage 1 — Pull back from a different direction
+  await easeCamera({
+    center: [76.894781, 32.602374],
+    zoom: 12.96,
+    pitch: 64.5,
+    bearing: -108.39,
+    duration: 2200,
+    easing: t => t * t * (3 - 2 * t)
+  });
+
+  // Stage 2 — Move towards Tandi
+  await easeCamera({
+    center: destination.center,
+    zoom: destination.zoom,
+    pitch: destination.pitch,
+    bearing: destination.bearing,
+    duration: 2600,
+    easing: t => t * t * (3 - 2 * t)
+  });
+
+  return;
+}
+
+if (
+  STORY[fromIndex]?.id === 'kugti-jot' &&
+  destination.id === 'tandi'
+) {
+
+  const cameraWaypoints = [
+
+    // Start from the current camera position.
+    {
+      center: map.getCenter().toArray(),
+      zoom: map.getZoom(),
+      pitch: map.getPitch(),
+      bearing: map.getBearing()
+    },
+
+    // Waypoint 1 — Leaving Kugti Jot.
+    {
+      center: [76.844651, 32.554483],
+      zoom: 13.313,
+      pitch: 66,
+      bearing: -145.06
+    },
+
+    // Waypoint 2 — Mountain traverse.
+    {
+      center: [76.894781, 32.602374],
+      zoom: 12.96,
+      pitch: 64.5,
+      bearing: -108.39
+    },
+
+    // Waypoint 3 — Turning towards Tandi.
+    {
+      center: [76.94738, 32.600003],
+      zoom: 12.857,
+      pitch: 53.52,
+      bearing: 0
+    },
+
+    // Waypoint 4 — Above Tandi.
+    {
+      center: [76.980444, 32.554338],
+      zoom: 13.741,
+      pitch: 48.02,
+      bearing: 43.21
+    },
+
+    // Finish at the existing Tandi chapter camera.
+    {
+      center: destination.center,
+      zoom: destination.zoom,
+      pitch: destination.pitch,
+      bearing: destination.bearing
+    }
+
+  ];
+
+  await flyCameraThroughWaypoints(
+    cameraWaypoints,
+    6500
+  );
+
+  return;
+}
+
+
+
+
+// This determines the camera transitions for all the routes and route points
   await easeCamera({
     center: destination.center,
     zoom: destination.zoom,
@@ -2858,10 +4627,317 @@ async function migrationCameraMove(
 
 
 // ============================================================
-// ENTER HIMACHAL CASE STUDY
+// EXPLORE BHARMOUR SHELL
 // ============================================================
 
-async function enterHimachalCaseStudy() {
+const exploreInteractionHandlers = [
+  'dragPan',
+  'dragRotate',
+  'scrollZoom',
+  'touchZoomRotate',
+  'doubleClickZoom',
+  'keyboard'
+];
+
+
+function captureExploreSnapshot() {
+
+  const layerVisibility = {};
+
+  map.getStyle().layers.forEach(
+    (layer) => {
+      layerVisibility[layer.id] =
+        map.getLayoutProperty(
+          layer.id,
+          'visibility'
+        ) || 'visible';
+    }
+  );
+
+  const interactionState = {};
+
+  exploreInteractionHandlers.forEach(
+    (handlerName) => {
+      interactionState[handlerName] =
+        map[handlerName].isEnabled();
+    }
+  );
+
+  return {
+    currentStoryIndex,
+    camera: getCurrentCamera(map),
+    maxZoom: map.getMaxZoom(),
+    panelScrollTop: storyPanelInner.scrollTop,
+    scrollLocked,
+    layerVisibility,
+    interactionState
+  };
+
+}
+
+
+function restoreExploreSnapshot(
+  snapshot
+) {
+
+  if (
+    !snapshot
+  ) {
+    return;
+  }
+
+  currentStoryIndex =
+    snapshot.currentStoryIndex;
+
+  map.jumpTo(
+    snapshot.camera
+  );
+
+  map.setMaxZoom(
+    snapshot.maxZoom
+  );
+
+  Object.entries(
+    snapshot.layerVisibility
+  ).forEach(
+    ([layerId, visibility]) => {
+      if (
+        map.getLayer(layerId)
+      ) {
+        map.setLayoutProperty(
+          layerId,
+          'visibility',
+          visibility
+        );
+      }
+    }
+  );
+
+  Object.entries(
+    snapshot.interactionState
+  ).forEach(
+    ([handlerName, enabled]) => {
+      const handler =
+        map[handlerName];
+
+      if (
+        enabled
+      ) {
+        handler.enable();
+      }
+      else {
+        handler.disable();
+      }
+    }
+  );
+
+  storyPanelInner.scrollTop =
+    snapshot.panelScrollTop;
+
+  scrollLocked =
+    snapshot.scrollLocked;
+
+}
+
+
+function exploreMotionDuration() {
+  return window.matchMedia(
+    '(prefers-reduced-motion: reduce)'
+  ).matches
+    ? 0
+    : 420;
+}
+
+
+function waitForExploreTransition(
+  token,
+  duration
+) {
+  return new Promise(
+    (resolve) => {
+      window.setTimeout(
+        () => resolve(
+          token === exploreTransitionToken
+        ),
+        duration
+      );
+    }
+  );
+}
+
+
+async function enterExploreMode() {
+
+  if (
+    exploreState !== 'story'
+    || atlasMode
+    || currentStoryIndex !== 1
+    || cameraAnimating
+  ) {
+    return;
+  }
+
+  exploreSnapshot =
+    captureExploreSnapshot();
+
+  const token =
+    ++exploreTransitionToken;
+
+  exploreState =
+    'entering';
+
+  map.setMaxZoom(
+    18
+  );
+
+  scrollLocked =
+    true;
+
+  exploreBharmourButton.disabled =
+    true;
+
+  storyPanel.classList.add(
+    'explore-hiding'
+  );
+
+  const completed =
+    await waitForExploreTransition(
+      token,
+      exploreMotionDuration()
+    );
+
+  if (
+    !completed
+  ) {
+    return;
+  }
+
+  exploreState =
+    'exploring';
+
+  if (
+    exploreThreeLayer
+  ) {
+    exploreThreeLayer.refreshTerrain();
+
+    map.once(
+      'idle',
+      () => {
+        if (
+          exploreState === 'exploring'
+        ) {
+          exploreThreeLayer.refreshTerrain();
+        }
+      }
+    );
+
+    exploreThreeLayer.fadeTo(
+      1,
+      exploreMotionDuration()
+    );
+  }
+
+  exploreModePanel.classList.add(
+    'visible'
+  );
+
+  exploreModePanel.setAttribute(
+    'aria-hidden',
+    'false'
+  );
+
+  returnToStoryButton.focus();
+
+}
+
+
+async function exitExploreMode() {
+
+  if (
+    exploreState === 'story'
+    || exploreState === 'exiting'
+  ) {
+    return;
+  }
+
+  const snapshot =
+    exploreSnapshot;
+
+  const token =
+    ++exploreTransitionToken;
+
+  exploreState =
+    'exiting';
+
+  if (
+    exploreThreeLayer
+  ) {
+    exploreThreeLayer.fadeTo(
+      0,
+      exploreMotionDuration()
+    );
+  }
+
+  exploreModePanel.classList.remove(
+    'visible'
+  );
+
+  exploreModePanel.setAttribute(
+    'aria-hidden',
+    'true'
+  );
+
+  storyPanel.classList.remove(
+    'explore-hiding'
+  );
+
+  const completed =
+    await waitForExploreTransition(
+      token,
+      exploreMotionDuration()
+    );
+
+  if (
+    !completed
+  ) {
+    return;
+  }
+
+  restoreExploreSnapshot(
+    snapshot
+  );
+
+  exploreSnapshot =
+    null;
+
+  exploreState =
+    'story';
+
+  exploreBharmourButton.disabled =
+    false;
+
+  exploreBharmourButton.focus();
+
+}
+
+
+exploreBharmourButton.addEventListener(
+  'click',
+  enterExploreMode
+);
+
+
+returnToStoryButton.addEventListener(
+  'click',
+  exitExploreMode
+);
+
+
+// ============================================================
+// ENTER STATE STORY
+// ============================================================
+
+async function enterStateCaseStudy(caseStudy) {
 
   if (
     cameraAnimating
@@ -2876,6 +4952,17 @@ async function enterHimachalCaseStudy() {
 
   cameraAnimating =
     true;
+
+  selectedOverviewState = null;
+
+  const storyConfig =
+    STORY_REGISTRY[caseStudy.storyId || caseStudy.id]
+    || STORY_REGISTRY.himachal;
+
+  STORY = storyConfig.chapters;
+  activeDialogues = storyConfig.dialogues;
+  activeStoryId = storyConfig.id;
+  updateProgressStopsForStory();
 
 
   disableExploration();
@@ -3073,6 +5160,11 @@ async function returnToAtlas() {
     currentStoryIndex =
       0;
 
+    STORY = HIMACHAL_STORY;
+    activeDialogues = HIMACHAL_DIALOGUES;
+    activeStoryId = 'himachal';
+    updateProgressStopsForStory();
+
     flockProgress = 0;
     updateFlockPosition(0);
 
@@ -3136,6 +5228,8 @@ async function goToChapter(
     atlasMode
     ||
     !storyReady
+    ||
+    exploreState !== 'story'
     ||
     cameraAnimating
   ) {
@@ -3202,26 +5296,34 @@ async function goToChapter(
     flockMarker
   ) {
 
-    flockMarker.getElement().style.display = destinationIndex >= 1
+    flockMarker.getElement().style.display = activeStoryId === 'himachal'
+      && destinationIndex >= 1
       ? 'block'
       : 'none';
 
   }
 
   if (
-    destinationIndex >= 1
+    activeStoryId === 'himachal'
+    && destinationIndex >= 1
   ) {
 
     [
       'route-points',
       'route-labels',
+      'ispur-darcha-route-points',
+      'ispur-darcha-route-labels',
+      'individual-ladakh-points',
+      'individual-ladakh-labels',
       'migration-route-casing',
       'migration-route-base',
       'migration-route',
-    'migration-route-highlight',
-    'shearing-location',
-    'kugti-sanctuary-fill',
-    'kugti-sanctuary-outline'
+      'migration-route-highlight',
+      'ispur-darcha-route-casing',
+      'ispur-darcha-route',
+      'shearing-location',
+      'kugti-sanctuary-fill',
+      'kugti-sanctuary-outline'
     ].forEach(
       (layerId) => {
 
@@ -3239,13 +5341,49 @@ async function goToChapter(
 
       }
     );
+const isAutumnReturn =
+  destination.migrationPhase === 'autumn-return';
 
-    updateRouteProgress(
-      getStoryRouteProgress(destination),
-      {
-        duration: transitionDuration
-      }
-    );
+const targetProgress =
+  getStoryRouteProgress(destination);
+
+if (Number.isFinite(targetProgress)) {
+  const isInitialBharmour =
+  destination.id === 'bharmour' &&
+  previousIndex === 0;
+
+  if (isInitialBharmour) {
+
+  updateRouteProgress(
+    targetProgress,
+    {
+      duration: 0,
+      migrationPhase: 'summer'
+    }
+  );
+
+} else {
+
+  updateRouteProgress(
+    targetProgress,
+    {
+      duration: transitionDuration,
+      migrationPhase: isAutumnReturn
+        ? 'autumn-return'
+        : 'summer'
+    }
+  );
+
+}
+
+} else {
+
+  console.warn(
+    'Skipping invalid route progress for:',
+    destination.id
+  );
+
+}
 
   }
   else {
@@ -3376,6 +5514,8 @@ window.addEventListener(
       ||
       !storyReady
       ||
+      exploreState !== 'story'
+      ||
       cameraAnimating
       ||
       scrollLocked
@@ -3503,9 +5643,165 @@ map.on(
       });
 
 
+      try {
+        const himachalBoundaryResponse = await fetch(
+          HIMACHAL_BOUNDARY_URL
+        );
+
+        if (!himachalBoundaryResponse.ok) {
+          throw new Error(
+            `Could not load Himachal boundary: ${himachalBoundaryResponse.status}`
+          );
+        }
+
+        const himachalBoundaryGeoJSON =
+          await himachalBoundaryResponse.json();
+
+        map.addSource(
+          'himachal-boundary',
+          {
+            type: 'geojson',
+            data: himachalBoundaryGeoJSON
+          }
+        );
+
+        map.addLayer({
+          id: 'himachal-boundary-fill',
+          type: 'fill',
+          source: 'himachal-boundary',
+          layout: {
+            visibility: 'none'
+          },
+          paint: {
+            'fill-color': '#8fa66f',
+            'fill-opacity': 0.06
+          }
+        });
+
+        map.addLayer({
+          id: 'himachal-boundary-outline',
+          type: 'line',
+          source: 'himachal-boundary',
+          layout: {
+            visibility: 'none',
+            'line-cap': 'round',
+            'line-join': 'round'
+          },
+          paint: {
+            'line-color': '#b7c995',
+            'line-width': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              5,
+              1.2,
+              8,
+              2,
+              12,
+              3
+            ],
+            'line-opacity': 0.78
+          }
+        });
+      }
+      catch (error) {
+        console.warn(
+          'Himachal boundary unavailable:',
+          error
+        );
+      }
+
+
+      try {
+        const [ladakhResponse, arunachalResponse] =
+          await Promise.all([
+            fetch(LADAKH_BOUNDARY_URL),
+            fetch(ARUNACHAL_BOUNDARY_URL)
+          ]);
+
+        if (!ladakhResponse.ok || !arunachalResponse.ok) {
+          throw new Error('Could not load Ladakh or Arunachal boundary.');
+        }
+
+        const [ladakhBoundaryGeoJSON, arunachalBoundaryGeoJSON] =
+          await Promise.all([
+            ladakhResponse.json(),
+            arunachalResponse.json()
+          ]);
+
+        [
+          {
+            id: 'ladakh',
+            data: ladakhBoundaryGeoJSON,
+            fillColor: '#8fa66f',
+            color: '#b7c995'
+          },
+          {
+            id: 'arunachal',
+            data: arunachalBoundaryGeoJSON,
+            fillColor: '#7fa89a',
+            color: '#7fa89a'
+          }
+        ].forEach((boundary) => {
+          map.addSource(
+            `${boundary.id}-boundary`,
+            {
+              type: 'geojson',
+              data: boundary.data
+            }
+          );
+
+          map.addLayer({
+            id: `${boundary.id}-boundary-fill`,
+            type: 'fill',
+            source: `${boundary.id}-boundary`,
+            layout: {
+              visibility: 'none'
+            },
+            paint: {
+              'fill-color': boundary.fillColor,
+              'fill-opacity': 0.045
+            }
+          });
+
+          map.addLayer({
+            id: `${boundary.id}-boundary-outline`,
+            type: 'line',
+            source: `${boundary.id}-boundary`,
+            layout: {
+              visibility: 'none',
+              'line-cap': 'round',
+              'line-join': 'round'
+            },
+            paint: {
+              'line-color': boundary.color,
+              'line-width': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                3,
+                1.1,
+                6,
+                1.8,
+                10,
+                2.8
+              ],
+              'line-opacity': 0.82
+            }
+          });
+        });
+      }
+      catch (error) {
+        console.warn(
+          'Ladakh or Arunachal boundary unavailable:',
+          error
+        );
+      }
+
+
       const routeResponse =
         await fetch(
-          ROUTE_URL
+          ISPUR_DARCHA_ROUTE_URL
         );
 
 
@@ -3689,6 +5985,92 @@ map.on(
         }
 
       });
+
+
+      // ======================================================
+      // ISPUR-DARCHA ROUTE (SUPPLEMENTAL)
+      // ======================================================
+
+      try {
+        const ispurDarchaResponse = await fetch(
+          ISPUR_DARCHA_ROUTE_URL
+        );
+
+        if (!ispurDarchaResponse.ok) {
+          throw new Error(
+            `Could not load Ispur-Darcha route: ${ispurDarchaResponse.status}`
+          );
+        }
+
+        const ispurDarchaGeoJSON =
+          await ispurDarchaResponse.json();
+
+        map.addSource(
+          'ispur-darcha-route',
+          {
+            type: 'geojson',
+            data: ispurDarchaGeoJSON
+          }
+        );
+
+        map.addLayer({
+          id: 'ispur-darcha-route-casing',
+          type: 'line',
+          source: 'ispur-darcha-route',
+          layout: {
+            'line-cap': 'round',
+            'line-join': 'round',
+            visibility: 'none'
+          },
+          paint: {
+            'line-color': 'rgba(28, 22, 16, 0.68)',
+            'line-width': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              8,
+              2.2,
+              11,
+              4,
+              14,
+              6.2
+            ],
+            'line-opacity': 0.75
+          }
+        });
+
+        map.addLayer({
+          id: 'ispur-darcha-route',
+          type: 'line',
+          source: 'ispur-darcha-route',
+          layout: {
+            'line-cap': 'round',
+            'line-join': 'round',
+            visibility: 'none'
+          },
+          paint: {
+            'line-color': '#8fa66f',
+            'line-width': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              8,
+              1.3,
+              11,
+              2.5,
+              14,
+              4
+            ],
+            'line-opacity': 0.92
+          }
+        });
+      }
+      catch (error) {
+        console.warn(
+          'Supplemental Ispur-Darcha route unavailable:',
+          error
+        );
+      }
 
 
       // ======================================================
@@ -4436,6 +6818,174 @@ map.on(
 
 
       // ======================================================
+      // ISPUR-DARCHA ROUTE POINTS (SUPPLEMENTAL)
+      // ======================================================
+
+      try {
+        const ispurDarchaPointsResponse = await fetch(
+          ISPUR_DARCHA_POINTS_URL
+        );
+
+        if (!ispurDarchaPointsResponse.ok) {
+          throw new Error(
+            `Could not load Ispur-Darcha route points: ${ispurDarchaPointsResponse.status}`
+          );
+        }
+
+        const ispurDarchaPointsGeoJSON =
+          await ispurDarchaPointsResponse.json();
+
+        map.addSource(
+          'ispur-darcha-route-points',
+          {
+            type: 'geojson',
+            data: ispurDarchaPointsGeoJSON
+          }
+        );
+
+        map.addLayer({
+          id: 'ispur-darcha-route-points',
+          type: 'circle',
+          source: 'ispur-darcha-route-points',
+          layout: {
+            visibility: 'none'
+          },
+          paint: {
+            'circle-radius': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              8,
+              3.5,
+              11,
+              5,
+              14,
+              7
+            ],
+            'circle-color': '#9ab88b',
+            'circle-stroke-color': 'rgba(20, 17, 13, 0.92)',
+            'circle-stroke-width': 1.5,
+            'circle-opacity': 0.92
+          }
+        });
+
+        map.addLayer({
+          id: 'ispur-darcha-route-labels',
+          type: 'symbol',
+          source: 'ispur-darcha-route-points',
+          layout: {
+            visibility: 'none',
+            'text-field': [
+              'coalesce',
+              ['get', 'Local Na_1'],
+              ['get', 'Name'],
+              'Route point'
+            ],
+            'text-size': 11,
+            'text-offset': [0, 1.2],
+            'text-anchor': 'top',
+            'text-allow-overlap': false
+          },
+          paint: {
+            'text-color': '#dce8c9',
+            'text-halo-color': 'rgba(15, 15, 12, 0.92)',
+            'text-halo-width': 1.5
+          }
+        });
+      }
+      catch (error) {
+        console.warn(
+          'Supplemental Ispur-Darcha route points unavailable:',
+          error
+        );
+      }
+
+
+      // ======================================================
+      // INDIVIDUAL LADAKH ROUTE POINTS
+      // ======================================================
+
+      try {
+        const individualLadakhResponse = await fetch(
+          INDIVIDUAL_LADAKH_POINTS_URL
+        );
+
+        if (!individualLadakhResponse.ok) {
+          throw new Error(
+            `Could not load individual Ladakh route: ${individualLadakhResponse.status}`
+          );
+        }
+
+        const individualLadakhGeoJSON =
+          await individualLadakhResponse.json();
+
+        map.addSource(
+          'individual-ladakh-route',
+          {
+            type: 'geojson',
+            data: individualLadakhGeoJSON
+          }
+        );
+
+        map.addLayer({
+          id: 'individual-ladakh-points',
+          type: 'circle',
+          source: 'individual-ladakh-route',
+          layout: {
+            visibility: 'none'
+          },
+          paint: {
+            'circle-radius': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              8,
+              4,
+              11,
+              5.5,
+              14,
+              7
+            ],
+            'circle-color': '#c58a62',
+            'circle-stroke-color': 'rgba(20, 17, 13, 0.92)',
+            'circle-stroke-width': 1.5,
+            'circle-opacity': 0.94
+          }
+        });
+
+        map.addLayer({
+          id: 'individual-ladakh-labels',
+          type: 'symbol',
+          source: 'individual-ladakh-route',
+          layout: {
+            visibility: 'none',
+            'text-field': [
+              'coalesce',
+              ['get', 'Local Name'],
+              ['get', 'Point No.'],
+              'Ladakh route point'
+            ],
+            'text-size': 11,
+            'text-offset': [0, 1.25],
+            'text-anchor': 'top',
+            'text-allow-overlap': false
+          },
+          paint: {
+            'text-color': '#f0d0b5',
+            'text-halo-color': 'rgba(15, 15, 12, 0.92)',
+            'text-halo-width': 1.5
+          }
+        });
+      }
+      catch (error) {
+        console.warn(
+          'Individual Ladakh route unavailable:',
+          error
+        );
+      }
+
+
+      // ======================================================
       // CULTURAL AND ECOLOGICAL CONTEXT
       // ======================================================
 
@@ -4669,6 +7219,33 @@ map.on(
           32.42
         ])
         .addTo(map);
+
+
+      exploreThreeLayer =
+        createExploreThreeLayer({
+          map,
+          assets:
+            BHARMOUR_EXPLORE_ASSETS
+        });
+
+      map.addLayer(
+        exploreThreeLayer
+      );
+
+      map.on(
+        'moveend',
+        () => {
+          if (
+            exploreState === 'exploring'
+          ) {
+            exploreThreeLayer.refreshTerrain();
+          }
+        }
+      );
+
+      exploreThreeLayer.setVisible(
+        false
+      );
 
 
       // ======================================================

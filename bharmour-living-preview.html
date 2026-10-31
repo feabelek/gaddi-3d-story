@@ -1,0 +1,72 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bharmour Living Atlas Terrain Study</title>
+</head>
+
+<body>
+  <main id="bharmour-living-preview">
+    <canvas id="living-preview-canvas"></canvas>
+
+    <header class="living-intro">
+      <div class="living-kicker">Living Atlas · terrain study</div>
+      <h1>Bharmour hillside</h1>
+      <p>A handcrafted terrain miniature for a future pastoral close-up.</p>
+    </header>
+
+    <aside class="living-controls" aria-label="Terrain preview controls">
+      <div class="living-status" id="living-status">Sculpting hillside...</div>
+      <button id="living-reset" type="button">Reset view</button>
+      <button id="living-close-up" type="button">Pastoral close-up</button>
+      <div class="living-dev-controls" id="living-dev-controls">
+        <label><input id="living-fog-toggle" type="checkbox" checked /> Fog</label>
+        <label><input id="living-woodland-toggle" type="checkbox" checked /> Woodland</label>
+        <label><input id="living-flock-toggle" type="checkbox" checked /> Flock</label>
+        <label><input id="living-shepherd-toggle" type="checkbox" checked /> Shepherd</label>
+        <label class="living-flock-control" for="living-flock-count">Flock
+          <select id="living-flock-count">
+            <option value="1">1</option>
+            <option value="10">10</option>
+            <option value="18" selected>18</option>
+            <option value="30">30</option>
+          </select>
+        </label>
+        <label class="living-haze-control" for="living-haze">Haze
+          <input id="living-haze" type="range" min="0" max="1" step="0.01" value="0.12" />
+          <output id="living-haze-value" for="living-haze">12%</output>
+        </label>
+        <button id="living-strong-fog" type="button">Strong Fog Test</button>
+      </div>
+      <button id="living-edit-toggle" type="button" aria-pressed="false">Edit Scene</button>
+      <section class="living-editor" id="living-editor" hidden aria-label="Scene placement editor">
+        <div class="living-editor-selection" id="living-editor-selection">No object selected</div>
+        <div class="living-editor-tools">
+          <button type="button" data-editor-tool="move">Move</button>
+          <button type="button" data-editor-tool="rotate">Rotate</button>
+          <button type="button" data-editor-tool="scale">Scale</button>
+          <button type="button" id="living-move-flock">Move flock</button>
+        </div>
+        <div class="living-editor-state" id="living-editor-state">Ground snap: on</div>
+        <div class="living-editor-actions">
+          <button type="button" id="living-undo">Undo</button>
+          <button type="button" id="living-redo">Redo</button>
+          <button type="button" id="living-export">Export JSON</button>
+          <button type="button" id="living-import-button">Import JSON</button>
+          <input id="living-import" type="file" accept="application/json,.json" hidden />
+          <button type="button" id="living-restore">Restore defaults</button>
+        </div>
+      </section>
+      <div class="living-hint">Drag to orbit · scroll to zoom · shift-drag to pan</div>
+    </aside>
+
+    <div class="living-credit">Illustrative terrain · not a geographic reconstruction</div>
+  </main>
+
+  <script type="module" src="/src/bharmour-living-preview.js"></script>
+</body>
+
+</html>

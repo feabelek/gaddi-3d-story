@@ -1,0 +1,37 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bharmour Asset Inspection</title>
+</head>
+
+<body>
+  <main id="asset-inspection">
+    <canvas id="asset-inspection-canvas"></canvas>
+
+    <header class="asset-header">
+      <div class="asset-kicker">Development-only diagnostic</div>
+      <h1>Flat-ground asset inspection</h1>
+      <p>DEM disabled. Models are evaluated independently on a 30m test plane.</p>
+    </header>
+
+    <aside class="asset-panel" aria-label="Asset diagnostics">
+      <div id="asset-status">Loading models...</div>
+      <div id="asset-report"></div>
+      <button id="asset-reset-camera" type="button">Reset camera</button>
+    </aside>
+
+    <div class="asset-legend">
+      <span class="asset-legend-swatch tree-swatch"></span> Pine tree
+      <span class="asset-legend-swatch sheep-swatch"></span> Sheep
+      <span class="asset-legend-swatch scale-swatch"></span> 1m reference
+    </div>
+  </main>
+
+  <script type="module" src="/src/bharmour-assets-preview.js"></script>
+</body>
+
+</html>
