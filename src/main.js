@@ -2958,6 +2958,16 @@ function updateMapVisibility() {
     ].id ===
     'tandi';
 
+  const showLadakhRaster =
+    (
+      atlasMode
+      && selectedOverviewState === 'ladakh'
+    )
+    || (
+      !atlasMode
+      && activeStoryId === 'ladakh'
+    );
+
 
   const visibility =
     showRoute
@@ -3013,6 +3023,16 @@ function updateMapVisibility() {
       }
     }
   );
+
+  if (
+    map.getLayer('ladakh-seasonal-raster-layer')
+  ) {
+    map.setLayoutProperty(
+      'ladakh-seasonal-raster-layer',
+      'visibility',
+      showLadakhRaster ? 'visible' : 'none'
+    );
+  }
 
 
   [
@@ -4382,6 +4402,37 @@ map.on(
         exaggeration:
           1.35
 
+      });
+
+
+      const ladakhRaster =
+        MAP_ASSETS.ladakh.seasonalRaster;
+
+      map.addSource(
+        'ladakh-seasonal-raster',
+        {
+          type: 'raster',
+          tiles: [
+            ladakhRaster.tiles
+          ],
+          bounds: ladakhRaster.bounds,
+          minzoom: ladakhRaster.minzoom,
+          maxzoom: ladakhRaster.maxzoom,
+          tileSize: 256
+        }
+      );
+
+      map.addLayer({
+        id: 'ladakh-seasonal-raster-layer',
+        type: 'raster',
+        source: 'ladakh-seasonal-raster',
+        layout: {
+          visibility: 'none'
+        },
+        paint: {
+          'raster-opacity': 0.72,
+          'raster-fade-duration': 250
+        }
       });
 
 

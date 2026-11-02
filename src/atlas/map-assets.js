@@ -26,7 +26,19 @@ export const MAP_ASSETS = {
     boundary:
       '/data/states/ladakh/geospatial/boundaries/Ladakh_Boundary.geojson',
     points:
-      '/data/states/ladakh/geospatial/points/individual_1.geojson'
+      '/data/states/ladakh/geospatial/points/individual_1.geojson',
+    seasonalRaster: {
+      tiles:
+        '/data/states/ladakh/geospatial/boundaries/{z}/{x}/{y}.png',
+      bounds: [
+        77.16796875,
+        32.026706293336126,
+        79.892578125,
+        34.813803317113134
+      ],
+      minzoom: 12,
+      maxzoom: 12
+    }
   },
 
   arunachal: {
