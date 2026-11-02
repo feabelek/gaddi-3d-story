@@ -4490,7 +4490,7 @@ map.on(
           visibility: 'none'
         },
         paint: {
-          'raster-opacity': 0.72,
+          'raster-opacity': 1,
           'raster-fade-duration': 250
         }
       });
