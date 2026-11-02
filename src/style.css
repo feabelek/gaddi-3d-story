@@ -1516,6 +1516,40 @@ body.image-viewer-open {
 }
 
 
+#ladakh-raster-toggle {
+  position: fixed;
+
+  right: 28px;
+  bottom: 28px;
+
+  z-index: 25;
+
+  padding: 9px 12px;
+
+  border: 1px solid rgba(224, 180, 93, 0.58);
+  background: rgba(18, 20, 16, 0.82);
+  color: #f2d18d;
+
+  cursor: pointer;
+  font: inherit;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+
+#ladakh-raster-toggle:hover,
+#ladakh-raster-toggle:focus-visible {
+  border-color: #f2d18d;
+  background: rgba(224, 180, 93, 0.18);
+  color: #fff0c8;
+  outline: none;
+}
+
+
 /* Chapter composition: keep the landing page layout unchanged. */
 @media (min-width: 651px) {
   body.case-study-active #story-panel {
@@ -2231,6 +2265,12 @@ body.image-viewer-open {
 
   #map-legend {
     display: none;
+  }
+
+
+  #ladakh-raster-toggle {
+    right: 22px;
+    bottom: 22px;
   }
 
 

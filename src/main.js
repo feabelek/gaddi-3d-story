@@ -232,6 +232,8 @@ let atlasMode = true;
 
 let selectedOverviewState = null;
 
+let ladakhRasterEnabled = true;
+
 let currentStoryIndex = 0;
 
 let cameraAnimating = false;
@@ -1282,6 +1284,49 @@ legend.innerHTML = `
 
 document.body.appendChild(
   legend
+);
+
+
+const ladakhRasterToggle =
+  document.createElement('button');
+
+ladakhRasterToggle.id =
+  'ladakh-raster-toggle';
+
+ladakhRasterToggle.type =
+  'button';
+
+ladakhRasterToggle.setAttribute(
+  'aria-pressed',
+  'true'
+);
+
+ladakhRasterToggle.hidden =
+  true;
+
+ladakhRasterToggle.textContent =
+  'Seasonal raster: On';
+
+ladakhRasterToggle.addEventListener(
+  'click',
+  () => {
+    ladakhRasterEnabled =
+      !ladakhRasterEnabled;
+
+    ladakhRasterToggle.setAttribute(
+      'aria-pressed',
+      String(ladakhRasterEnabled)
+    );
+
+    ladakhRasterToggle.textContent =
+      `Seasonal raster: ${ladakhRasterEnabled ? 'On' : 'Off'}`;
+
+    updateMapVisibility();
+  }
+);
+
+document.body.appendChild(
+  ladakhRasterToggle
 );
 
 
@@ -2958,7 +3003,7 @@ function updateMapVisibility() {
     ].id ===
     'tandi';
 
-  const showLadakhRaster =
+  const isLadakhContext =
     (
       atlasMode
       && selectedOverviewState === 'ladakh'
@@ -2967,6 +3012,21 @@ function updateMapVisibility() {
       !atlasMode
       && activeStoryId === 'ladakh'
     );
+
+  const showLadakhRaster =
+    isLadakhContext
+    && ladakhRasterEnabled;
+
+  ladakhRasterToggle.hidden =
+    !isLadakhContext;
+
+  ladakhRasterToggle.setAttribute(
+    'aria-pressed',
+    String(ladakhRasterEnabled)
+  );
+
+  ladakhRasterToggle.textContent =
+    `Seasonal raster: ${ladakhRasterEnabled ? 'On' : 'Off'}`;
 
 
   const visibility =
