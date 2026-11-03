@@ -20,7 +20,7 @@ export const CASE_STUDIES = [
   {
     id: 'ladakh',
     state: 'Ladakh',
-    subtitle: 'Individual route study',
+    subtitle: 'Changpas of Korzok',
     center: [77.584, 34.1526],
     markerCenter: [77.6621398626827, 34.7165113373715],
     labelOffset: [15, -10],
@@ -102,13 +102,98 @@ export const CHAPTER_DIALOGUES = {
       'Mohanlal: These weeks are for grazing, lambing, and repairing what the journey has worn down.'
     ]
   },
-  'full-route': {
+  'summer-route-overview': {
     speaker: 'Mohanlal',
     role: 'Looking back on the annual cycle',
     quote: 'When we return, the path is changed by the time we have spent on it.',
     conversation: [
       'Mohanlal: When we return, the path is changed by the time we have spent on it.',
       'Mohanlal: We carry the mountain home with us, even when the flock comes down.'
+    ]
+  },
+  'hadsar-autumn': {
+    speaker: 'Mohanlal',
+    role: 'On the autumn return',
+    quote: 'The return follows the same mountains, but the flock is moving with the season now.',
+    conversation: [
+      'Mohanlal: The return follows the same mountains, but the flock is moving with the season now.',
+      'Interviewer: Does the route feel different on the way down?',
+      'Mohanlal: The valleys open differently when we are carrying summer back toward home.'
+    ]
+  },
+  'gadderan-belt': {
+    speaker: 'Mohanlal',
+    role: 'At the Gadderan Belt',
+    quote: 'Deol is a stopping point, but the whole belt is part of the passage home.',
+    conversation: [
+      'Mohanlal: From Bharmour through Holi and Deol, the route connects villages, markets, and pasture edges.',
+      'Interviewer: So the marker is only one point in a wider landscape?',
+      'Mohanlal: Exactly. The flock stops at Deol, but the journey belongs to the Gadderan Belt.'
+    ]
+  },
+  'jalsu-pass': {
+    speaker: 'Mohanlal',
+    role: 'At Jalsu Pass',
+    quote: 'Every pass is a negotiation between the flock, the weather, and the road ahead.',
+    conversation: [
+      'Mohanlal: Jalsu is a high crossing on the winter route.',
+      'Mohanlal: We watch the animals closely here because the descent changes their pace.'
+    ]
+  },
+  'sokhru-galua-tikkar': {
+    speaker: 'Mohanlal',
+    role: 'At the trade crossings',
+    quote: 'The trade markets are part of the migration too; movement carries wool, animals, and news.',
+    conversation: [
+      'Mohanlal: Sokhru and Galua Tikkar are connected by the movement of people and goods.',
+      'Interviewer: Is Galua Tikkar where the flock stops?',
+      'Mohanlal: Yes, but the market story belongs to both places together.'
+    ]
+  },
+  'sullah-dheeral-thural': {
+    speaker: 'Mohanlal',
+    role: 'On the lower transit route',
+    quote: 'Some places are remembered as a short rest between longer days of walking.',
+    conversation: [
+      'Mohanlal: Sullah, Dheeral, and Thural are brief transit stops on the way down.',
+      'Mohanlal: The flock settles at Thural before we continue toward the river crossing.'
+    ]
+  },
+  'dehra-gopipur': {
+    speaker: 'Mohanlal',
+    role: 'At the river crossing',
+    quote: 'At Dehra Gopipur, the river marks a change in the journey.',
+    conversation: [
+      'Mohanlal: We cross here together, keeping the flock close as the route changes direction.',
+      'Mohanlal: Water is part of the journey even when the destination is still far away.'
+    ]
+  },
+  'ambota-shiv-bari': {
+    speaker: 'Mohanlal',
+    role: 'On the final winter approach',
+    quote: 'Ambota and Shiv Bari bring the flock closer to the winter destination.',
+    conversation: [
+      'Mohanlal: These two places belong to one stretch of the return journey.',
+      'Mohanlal: By Shiv Bari, the animals know the long descent is almost complete.'
+    ]
+  },
+  ispur: {
+    speaker: 'Mohanlal',
+    role: 'At Ispur',
+    quote: 'The winter destination is a place to rest, repair, and wait for the cycle to turn again.',
+    conversation: [
+      'Mohanlal: Ispur is where the flock settles after the long return from the high pastures.',
+      'Interviewer: And when does the journey begin again?',
+      'Mohanlal: When the next season calls us back toward the mountains.'
+    ]
+  },
+  'full-route': {
+    speaker: 'Mohanlal',
+    role: 'Looking back across the annual cycle',
+    quote: 'The full route is not a line between two places; it is a year lived across many landscapes.',
+    conversation: [
+      'Mohanlal: From Ispur to Darcha and back again, every stop is part of the same cycle.',
+      'Mohanlal: The flock remembers the route through the seasons, and so do we.'
     ]
   }
 };
@@ -376,7 +461,7 @@ bearing: -101.59,
 
   // SUMMER ROUTE OVERVIEW
   {
-    id: 'full-route',
+    id: 'summer-route-overview',
     eyebrow: 'The Migration',
     title: 'A journey across landscapes',
     location: 'Bharmour → Darcha',
@@ -399,37 +484,169 @@ bearing: -101.59,
   },
 
 
-  // RETURN TO HADSAR - BHARMOUR
-{
-  id: 'hadsar-autumn',
-  migrationPhase: 'autumn-return',
-
-  title: 'The Autumn Return',
-
-  center: [76.61323, 32.450849],
-  zoom: 14.119,
-  pitch: 54.5,
-  bearing: -85.73,
-
-  // Use the Hadsar location from the existing chapter.
-  routeStop: [76.61126,
-    32.45489],
-
-  text: `
-
-      As summer draws to a close, the shepherds begin
+  // WINTER RETURN
+  {
+    id: 'hadsar-autumn',
+    migrationPhase: 'autumn-return',
+    eyebrow: 'Autumn Return · Retracing the Route',
+    title: 'Back through Hadsar',
+    location: 'Hadsar',
+    text: `As summer draws to a close, the shepherds begin
       their return from the high-altitude grazing grounds
-      of Lahaul.
-
-
-
-      Retracing their journey through the mountains,
-      they make their way toward Bharmour. Along the
-      return route, seasonal activities such as wool
-      shearing form part of the pastoral calendar.
-
-  `
-},
+      of Lahaul. The route is familiar, but the flock and
+      the landscape are moving into a different season.`,
+    detail: `From Hadsar onward, the story turns toward the
+      winter migration and the lower valleys.`,
+    center: [76.61323, 32.450849],
+    zoom: 14.119,
+    pitch: 54.5,
+    bearing: -85.73,
+    routeStop: [76.61125696114797, 32.4548878877319],
+    showLegend: true
+  },
+  {
+    id: 'gadderan-belt',
+    migrationPhase: 'autumn-return',
+    eyebrow: 'Winter Migration · Gadderan Belt',
+    title: 'A belt of villages and passage',
+    location: 'Gadderan Belt · Bharmour · Holi · Deol',
+    text: `At Deol, the flock pauses within the wider Gadderan
+      Belt, a connected landscape that brings Bharmour, Holi,
+      and Deol into the winter return route.`,
+    detail: `The marker rests at Deol, while the camera opens out
+      to show the three places together as one connected belt.`,
+    center: [76.50124, 32.398823],
+    zoom: 11.823,
+    pitch: 49,
+    bearing: 105.61,
+    routeStop: [76.5871364, 32.3045906],
+    showLegend: true
+  },
+  {
+    id: 'jalsu-pass',
+    migrationPhase: 'autumn-return',
+    eyebrow: 'Winter Migration · High Crossing',
+    title: 'Jalsu Pass',
+    location: 'Jalsu Pass',
+    text: `The return continues through Jalsu Pass, where the
+      flock crosses another high section before descending
+      toward the winter routes.`,
+    detail: `The pass is both a physical crossing and a seasonal
+      threshold between the higher summer landscape and the
+      lower winter journey.`,
+    center: [76.682568, 32.204868],
+    zoom: 13.105,
+    pitch: 64.5,
+    bearing: 154.76,
+    routeStop: [76.68357, 32.184],
+    showLegend: true
+  },
+  {
+    id: 'sokhru-galua-tikkar',
+    migrationPhase: 'autumn-return',
+    eyebrow: 'Winter Migration · Trade Markets',
+    title: 'Routes of exchange',
+    location: 'Sokhru · Galua Tikkar',
+    text: `Sokhru and Galua Tikkar form one narrative of trade
+      markets, where pastoral movement meets the exchange of
+      wool, animals, provisions, and news.`,
+    detail: `The flock stops at Galua Tikkar, while the camera
+      holds both locations in the same field of view.`,
+    center: [76.626734, 32.10866],
+    zoom: 13.595,
+    pitch: 68,
+    bearing: 66.56,
+    routeStop: [76.61249719132908, 32.10622440376333],
+    showLegend: true
+  },
+  {
+    id: 'sullah-dheeral-thural',
+    migrationPhase: 'autumn-return',
+    eyebrow: 'Winter Migration · Transit Stops',
+    title: 'A short passage through the lowlands',
+    location: 'Sullah · Dheeral · Thural',
+    text: `Sullah, Dheeral, and Thural are brief transit stops
+      along the lower route. Together they describe the small
+      pauses that carry the flock toward the plains.`,
+    detail: `The flock marker stops at Thural, while the camera
+      gathers all three places into one view.`,
+    center: [76.440984, 32.005587],
+    zoom: 12.48,
+    pitch: 22.48,
+    bearing: -104.32,
+    routeStop: [76.44270766632877, 31.94162869120387],
+    showLegend: true
+  },
+  {
+    id: 'dehra-gopipur',
+    migrationPhase: 'autumn-return',
+    eyebrow: 'Winter Migration · River Crossing',
+    title: 'Crossing the river',
+    location: 'Dehra Gopipur',
+    text: `At Dehra Gopipur, the route reaches a river crossing.
+      The flock moves through one focused point in the winter
+      journey before continuing toward the lower valleys.`,
+    detail: `A single stop, but an important change in the route.`,
+    center: [76.218881, 31.879169],
+    zoom: 14.698,
+    pitch: 68,
+    bearing: -8.03,
+    routeStop: [76.21485615145284, 31.881720353402354],
+    showLegend: true
+  },
+  {
+    id: 'ambota-shiv-bari',
+    migrationPhase: 'autumn-return',
+    eyebrow: 'Winter Migration · Final Approach',
+    title: 'Toward the winter destination',
+    location: 'Ambota · Shiv Bari',
+    text: `Ambota and Shiv Bari belong to the final approach of
+      the winter migration, when the flock has left the high
+      country far behind.`,
+    detail: `The marker rests at Shiv Bari while the camera holds
+      both points together as one narrative stop.`,
+    center: [76.071902, 31.655893],
+    zoom: 13.9,
+    pitch: 47.95,
+    bearing: 0,
+    routeStop: [76.08379387974247, 31.639537307180802],
+    showLegend: true
+  },
+  {
+    id: 'ispur',
+    migrationPhase: 'autumn-return',
+    eyebrow: 'Winter Migration · Destination',
+    title: 'Arrival at Ispur',
+    location: 'Ispur',
+    text: `Ispur is the final winter destination in this route.
+      Here the flock settles after the long return from the
+      summer pastures and the annual cycle reaches its pause.`,
+    detail: `The next movement will begin when the season turns
+      again toward the mountains.`,
+    center: [76.189298, 31.503704],
+    zoom: 15.994,
+    pitch: 68,
+    bearing: 141,
+    routeStop: [76.18753, 31.5061],
+    showLegend: true
+  },
+  {
+    id: 'full-route',
+    eyebrow: 'The Annual Cycle',
+    title: 'The full route, across the seasons',
+    location: 'Darcha → Hadsar → Ispur → Darcha',
+    text: `From the high summer pastures to the winter destination
+      and back again, the route is a seasonal cycle rather than
+      a single journey in one direction.`,
+    detail: `The overview returns the story to the scale of the
+      whole migration, connecting every stop across the year.`,
+    center: [76.742734, 32.02601],
+    zoom: 8.868,
+    pitch: 24.01,
+    bearing: 0,
+    routeProgress: 1,
+    showLegend: true
+  },
 
 
 

@@ -3601,6 +3601,39 @@ async function migrationCameraMove(
 
   const destination = STORY[toIndex];
   const travel = getTravelCamera(fromIndex, toIndex);
+
+  if (
+    destination.migrationPhase === 'autumn-return'
+  ) {
+    const startCenter = map.getCenter().toArray();
+    const approachCenter = [
+      startCenter[0]
+        + (destination.center[0] - startCenter[0]) * 0.55,
+      startCenter[1]
+        + (destination.center[1] - startCenter[1]) * 0.55
+    ];
+
+    await easeCamera({
+      center: approachCenter,
+      zoom: travel.zoom,
+      pitch: travel.pitch,
+      bearing: destination.bearing,
+      duration: travel.duration1 + 500,
+      easing: (t) => t * t * (3 - 2 * t)
+    });
+
+    await easeCamera({
+      center: destination.center,
+      zoom: destination.zoom,
+      pitch: destination.pitch,
+      bearing: destination.bearing,
+      duration: travel.duration2 + 500,
+      easing: (t) => t * t * (3 - 2 * t)
+    });
+
+    return;
+  }
+
     // ======================================================
   // CINEMATIC MOUNTAIN PASS — KUGTI JOT
   // ======================================================
