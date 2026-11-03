@@ -27,6 +27,10 @@ export const MAP_ASSETS = {
       '/data/states/ladakh/geospatial/boundaries/Ladakh_Boundary.geojson',
     points:
       '/data/states/ladakh/geospatial/points/individual_1.geojson',
+    route:
+      '/data/states/ladakh/geospatial/routes/Ladakh_Path.geojson',
+    storyPoints:
+      '/data/states/ladakh/geospatial/points/Ladakh_RP.geojson',
     seasonalRaster: {
       tiles:
         '/data/states/ladakh/geospatial/boundaries/{z}/{x}/{y}.png',

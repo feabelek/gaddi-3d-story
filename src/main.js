@@ -42,6 +42,8 @@ const ISPUR_DARCHA_ROUTE_URL = MAP_ASSETS.himachal.storyRoute;
 const POINTS_URL = MAP_ASSETS.himachal.points;
 const ISPUR_DARCHA_POINTS_URL = MAP_ASSETS.himachal.storyPoints;
 const INDIVIDUAL_LADAKH_POINTS_URL = MAP_ASSETS.ladakh.points;
+const LADAKH_ROUTE_URL = MAP_ASSETS.ladakh.route;
+const LADAKH_STORY_POINTS_URL = MAP_ASSETS.ladakh.storyPoints;
 const SHEARING_URL = MAP_ASSETS.himachal.shearing;
 const RIVERS_URL = MAP_ASSETS.himachal.rivers;
 const TEMPLE_URL = MAP_ASSETS.himachal.temple;
@@ -3017,6 +3019,10 @@ function updateMapVisibility() {
     isLadakhContext
     && ladakhRasterEnabled;
 
+  const showLadakhStory =
+    !atlasMode
+    && activeStoryId === 'ladakh';
+
   ladakhRasterToggle.hidden =
     !isLadakhContext;
 
@@ -3093,6 +3099,23 @@ function updateMapVisibility() {
       showLadakhRaster ? 'visible' : 'none'
     );
   }
+
+  [
+    'ladakh-route-casing',
+    'ladakh-route',
+    'ladakh-route-points',
+    'ladakh-route-labels'
+  ].forEach(
+    (layerId) => {
+      if (map.getLayer(layerId)) {
+        map.setLayoutProperty(
+          layerId,
+          'visibility',
+          showLadakhStory ? 'visible' : 'none'
+        );
+      }
+    }
+  );
 
 
   [
@@ -5866,6 +5889,158 @@ map.on(
       catch (error) {
         console.warn(
           'Individual Ladakh route unavailable:',
+          error
+        );
+      }
+
+
+      // ======================================================
+      // LADAKH STORY ROUTE AND POINTS
+      // ======================================================
+
+      try {
+        const [ladakhRouteResponse, ladakhPointsResponse] =
+          await Promise.all([
+            fetch(LADAKH_ROUTE_URL),
+            fetch(LADAKH_STORY_POINTS_URL)
+          ]);
+
+        if (
+          !ladakhRouteResponse.ok
+          || !ladakhPointsResponse.ok
+        ) {
+          throw new Error(
+            'Could not load Ladakh story route or points.'
+          );
+        }
+
+        const [ladakhRouteGeoJSON, ladakhPointsGeoJSON] =
+          await Promise.all([
+            ladakhRouteResponse.json(),
+            ladakhPointsResponse.json()
+          ]);
+
+        map.addSource(
+          'ladakh-story-route',
+          {
+            type: 'geojson',
+            data: ladakhRouteGeoJSON,
+            lineMetrics: true
+          }
+        );
+
+        map.addLayer({
+          id: 'ladakh-route-casing',
+          type: 'line',
+          source: 'ladakh-story-route',
+          layout: {
+            visibility: 'none',
+            'line-cap': 'round',
+            'line-join': 'round'
+          },
+          paint: {
+            'line-color': 'rgba(22, 28, 25, 0.88)',
+            'line-width': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              5,
+              3.5,
+              10,
+              6,
+              14,
+              9
+            ],
+            'line-opacity': 0.92
+          }
+        });
+
+        map.addLayer({
+          id: 'ladakh-route',
+          type: 'line',
+          source: 'ladakh-story-route',
+          layout: {
+            visibility: 'none',
+            'line-cap': 'round',
+            'line-join': 'round'
+          },
+          paint: {
+            'line-color': '#d3a85f',
+            'line-width': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              5,
+              1.5,
+              10,
+              3,
+              14,
+              5
+            ],
+            'line-opacity': 0.92
+          }
+        });
+
+        map.addSource(
+          'ladakh-story-points',
+          {
+            type: 'geojson',
+            data: ladakhPointsGeoJSON
+          }
+        );
+
+        map.addLayer({
+          id: 'ladakh-route-points',
+          type: 'circle',
+          source: 'ladakh-story-points',
+          layout: {
+            visibility: 'none'
+          },
+          paint: {
+            'circle-radius': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              5,
+              3.5,
+              10,
+              5,
+              14,
+              7
+            ],
+            'circle-color': '#d3a85f',
+            'circle-stroke-color': 'rgba(20, 17, 13, 0.92)',
+            'circle-stroke-width': 1.5,
+            'circle-opacity': 0.98
+          }
+        });
+
+        map.addLayer({
+          id: 'ladakh-route-labels',
+          type: 'symbol',
+          source: 'ladakh-story-points',
+          layout: {
+            visibility: 'none',
+            'text-field': [
+              'coalesce',
+              ['get', 'Name'],
+              'Ladakh route point'
+            ],
+            'text-size': 11,
+            'text-offset': [0, 1.25],
+            'text-anchor': 'top',
+            'text-allow-overlap': false
+          },
+          paint: {
+            'text-color': '#f0d0b5',
+            'text-halo-color': 'rgba(15, 15, 12, 0.92)',
+            'text-halo-width': 1.5
+          }
+        });
+      }
+      catch (error) {
+        console.warn(
+          'Ladakh story route unavailable:',
           error
         );
       }
