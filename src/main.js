@@ -3017,14 +3017,17 @@ function updateMapVisibility() {
 
   const showLadakhRaster =
     isLadakhContext
+    && currentStoryIndex >= 1
     && ladakhRasterEnabled;
 
   const showLadakhStory =
     !atlasMode
-    && activeStoryId === 'ladakh';
+    && activeStoryId === 'ladakh'
+    && currentStoryIndex >= 1;
 
   ladakhRasterToggle.hidden =
-    !isLadakhContext;
+    !isLadakhContext
+    || currentStoryIndex < 1;
 
   ladakhRasterToggle.setAttribute(
     'aria-pressed',

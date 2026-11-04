@@ -1,15 +1,43 @@
 export const STORY = [
   {
+    id: 'ladakh',
+    eyebrow: 'Case Study 02 · Trans-Himalaya',
+    title: 'A seasonal landscape shaped by movement',
+    location: 'Ladakh',
+    text: `The Changpa pastoralists move through the high
+      landscapes of Ladakh according to the changing seasons.
+      Their route connects home villages, mountain passes,
+      and grazing grounds across a wide trans-Himalayan terrain.`,
+    detail: `This opening view introduces Ladakh as a state and
+      landscape before the story enters the route itself.`,
+    center: [77.584, 34.1526],
+    zoom: 6.2,
+    pitch: 0,
+    bearing: 0,
+    routeProgress: 0,
+    showLegend: false
+  },
+  {
     id: 'ladakh-korzok',
     eyebrow: 'Ladakh · Home Village',
     title: 'The seasonal cycle begins at home',
     location: 'Korzok',
-    text: `Korzok is the home village from which the seasonal
-      movement of the Changpa pastoralists begins. The route
-      connects settlement, pasture, and high mountain passes
-      across the year.`,
-    detail: `The first stop establishes the village as the social
-      and seasonal anchor of the route.`,
+    text: `Our journey begins in Korzok, a permanent Changpa settlement on the northwestern shore of Tso Moriri,
+    where 52-year-old Nawang Tashi maintains his family home.
+    As spring arrives in May, families begin getting their animals and supplies ready for the months ahead.
+    As temperatures rise in the months of June & July, the goats begin to moult, allowing herders to comb and collect the valuable fibre.
+    This annual harvest is one of the most important activities in the pastoral calendar. The Changra goat is specially adapted to this cold, dry environment.
+    Beneath its coarse outer coat grows the dense undercoat that insulates it through the long winter.
+    The quality of Changthang pashmina is associated with the exceptional fineness of these fibres, often around 12 microns in diameter.
+    The raw fibre eventually enters a wider trade network connecting the grazing grounds of Changthang with the weaving centres of Kashmir.
+
+
+`,
+    detail: `Once traded through Korzok, the highly-prized pashmina fibre eventually enters a wider trade network connecting Changthang with the weaving centres of Kashmir.
+The Changpa livestock are treated in medicated tanks to protect them from parasites.
+Korzok Monastery is an important hub where Changpa families from the regions of Kharnak, Samad & Rupsho come together.
+At the end of July, the families gather for the Korzok Gustor, a two-day Changthangi Nomadic Festival.
+This marks the onset of another season of migration.`,
     center: [78.235992, 32.966262],
     zoom: 12.952,
     pitch: 62.5,
