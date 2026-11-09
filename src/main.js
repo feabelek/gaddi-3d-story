@@ -2124,8 +2124,8 @@ function updateRouteProgress(
     const baseDuration = options.duration
       || Math.abs(p - startProgress) * 2600;
     const duration = Math.min(
-      6000,
-      Math.max(1500, baseDuration * 1.35)
+      14000,
+      Math.max(6000, baseDuration * 2.4)
     );
 
     const animateFlock = (now) => {
