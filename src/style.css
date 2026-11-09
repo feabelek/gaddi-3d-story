@@ -1635,8 +1635,8 @@ body.image-viewer-open {
       linear-gradient(
         90deg,
         rgba(8, 10, 8, 0),
-        rgba(8, 10, 8, 0.86) 42%,
-        rgba(8, 10, 8, 0.96) 100%
+        rgba(8, 10, 8, 0.52) 42%,
+        rgba(8, 10, 8, 0.70) 100%
       );
   }
 
