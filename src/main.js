@@ -1241,7 +1241,7 @@ legend.innerHTML = `
   <div class="legend-item">
 
     <span class="legend-home">
-      △
+      ●
     </span>
 
     <span>
@@ -5718,7 +5718,7 @@ map.on(
             ],
 
             'home',
-            '△',
+            '●',
 
             'destination',
             '◇',
@@ -6236,7 +6236,7 @@ map.on(
               'match',
               ['get', 'story_type'],
               'home',
-              '△',
+              '●',
               'destination',
               '◇',
               '●'
