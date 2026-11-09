@@ -2123,14 +2123,12 @@ function updateRouteProgress(
     const startedAt = performance.now();
     const baseDuration = options.duration
       || Math.abs(p - startProgress) * 2600;
-    const duration = Math.min(
-      14000,
-      Math.max(6000, baseDuration * 2.4)
-    );
+    const duration = Math.max(1, baseDuration);
 
     const animateFlock = (now) => {
       const elapsed = Math.min(1, (now - startedAt) / duration);
-      const eased = elapsed * elapsed * (3 - 2 * elapsed);
+      const eased = elapsed * elapsed * elapsed
+        * (elapsed * (elapsed * 6 - 15) + 10);
       const value = startProgress + (p - startProgress) * eased;
 
       if (isAutumnReturn) {
