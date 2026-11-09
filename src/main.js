@@ -1990,12 +1990,12 @@ function updateRouteProgress(
   ) {
 
     const startedAt = performance.now();
-    const duration = options.duration
-      ||
-       Math.min(
-        1800,
-        Math.max(700, Math.abs(p - startProgress) * 2600)
-      );
+    const baseDuration = options.duration
+      || Math.abs(p - startProgress) * 2600;
+    const duration = Math.min(
+      6000,
+      Math.max(1500, baseDuration * 1.35)
+    );
 
     const animateFlock = (now) => {
       const elapsed = Math.min(1, (now - startedAt) / duration);
@@ -2022,6 +2022,19 @@ updateFlockPosition(value);
     flockAnimationFrame = requestAnimationFrame(animateFlock);
     return;
 
+  }
+
+
+  if (
+    isAutumnReturn
+  ) {
+    setAutumnRouteProgressPaint(
+      p,
+      season
+    );
+    flockProgress = p;
+    updateFlockPosition(p);
+    return;
   }
 
 
@@ -3377,9 +3390,9 @@ function updateMapVisibility() {
           ]
         ),
         {
-          season: getChapterSeason(
-            STORY[currentStoryIndex]
-          )
+          migrationPhase:
+            STORY[currentStoryIndex]?.migrationPhase,
+          season: getChapterSeason(STORY[currentStoryIndex])
         }
 
       );
