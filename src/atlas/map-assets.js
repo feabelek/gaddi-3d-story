@@ -8,8 +8,6 @@ export const MAP_ASSETS = {
       '/data/states/himachal/geospatial/routes/Bharmour_Darcha_HP_Route.geojson',
     storyRoute:
       '/data/states/himachal/geospatial/routes/HP_Story_Map_Route_Ispur_Darcha.geojson',
-    points:
-      '/data/states/himachal/geospatial/points/Bharmour_Darcha_RP_WGS84.geojson',
     storyPoints:
       '/data/states/himachal/geospatial/points/HP_Story_Route_Points.geojson',
     shearing:

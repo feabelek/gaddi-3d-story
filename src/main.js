@@ -42,8 +42,7 @@ maplibregl.setWorkerUrl(workerUrl);
 
 const ROUTE_URL = MAP_ASSETS.himachal.route;
 const ISPUR_DARCHA_ROUTE_URL = MAP_ASSETS.himachal.storyRoute;
-const POINTS_URL = MAP_ASSETS.himachal.points;
-const ISPUR_DARCHA_POINTS_URL = MAP_ASSETS.himachal.storyPoints;
+const POINTS_URL = MAP_ASSETS.himachal.storyPoints;
 const INDIVIDUAL_LADAKH_POINTS_URL = MAP_ASSETS.ladakh.points;
 const LADAKH_ROUTE_URL = MAP_ASSETS.ladakh.route;
 const LADAKH_STORY_POINTS_URL = MAP_ASSETS.ladakh.storyPoints;
@@ -3338,8 +3337,6 @@ function updateMapVisibility() {
 
     'route-points',
     'route-labels',
-    'ispur-darcha-route-points',
-    'ispur-darcha-route-labels',
     'individual-ladakh-points',
     'individual-ladakh-labels',
     'migration-route',
@@ -4416,8 +4413,6 @@ async function goToChapter(
     [
       'route-points',
       'route-labels',
-      'ispur-darcha-route-points',
-      'ispur-darcha-route-labels',
       'individual-ladakh-points',
       'individual-ladakh-labels',
       'migration-route',
@@ -5949,90 +5944,6 @@ map.on(
         }
 
       });
-
-
-      // ======================================================
-      // ISPUR-DARCHA ROUTE POINTS (SUPPLEMENTAL)
-      // ======================================================
-
-      try {
-        const ispurDarchaPointsResponse = await fetch(
-          ISPUR_DARCHA_POINTS_URL
-        );
-
-        if (!ispurDarchaPointsResponse.ok) {
-          throw new Error(
-            `Could not load Ispur-Darcha route points: ${ispurDarchaPointsResponse.status}`
-          );
-        }
-
-        const ispurDarchaPointsGeoJSON =
-          await ispurDarchaPointsResponse.json();
-
-        map.addSource(
-          'ispur-darcha-route-points',
-          {
-            type: 'geojson',
-            data: ispurDarchaPointsGeoJSON
-          }
-        );
-
-        map.addLayer({
-          id: 'ispur-darcha-route-points',
-          type: 'circle',
-          source: 'ispur-darcha-route-points',
-          layout: {
-            visibility: 'none'
-          },
-          paint: {
-            'circle-radius': [
-              'interpolate',
-              ['linear'],
-              ['zoom'],
-              8,
-              3.5,
-              11,
-              5,
-              14,
-              7
-            ],
-            'circle-color': '#9ab88b',
-            'circle-stroke-color': 'rgba(20, 17, 13, 0.92)',
-            'circle-stroke-width': 1.5,
-            'circle-opacity': 0.92
-          }
-        });
-
-        map.addLayer({
-          id: 'ispur-darcha-route-labels',
-          type: 'symbol',
-          source: 'ispur-darcha-route-points',
-          layout: {
-            visibility: 'none',
-            'text-field': [
-              'coalesce',
-              ['get', 'Local Na_1'],
-              ['get', 'Name'],
-              'Route point'
-            ],
-            'text-size': 11,
-            'text-offset': [0, 1.2],
-            'text-anchor': 'top',
-            'text-allow-overlap': false
-          },
-          paint: {
-            'text-color': '#dce8c9',
-            'text-halo-color': 'rgba(15, 15, 12, 0.92)',
-            'text-halo-width': 1.5
-          }
-        });
-      }
-      catch (error) {
-        console.warn(
-          'Supplemental Ispur-Darcha route points unavailable:',
-          error
-        );
-      }
 
 
       // ======================================================
