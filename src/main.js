@@ -2408,7 +2408,7 @@ function updateFlockPosition(
     routeStartProgress,
     Math.min(
       1,
-      progress + flockTravelDirection * 0.0025
+      progress + flockTravelDirection * 0.00035
     )
   );
 
@@ -6143,6 +6143,22 @@ map.on(
             ladakhPointsResponse.json()
           ]);
 
+        ladakhPointsGeoJSON.features.forEach(
+          (feature) => {
+            feature.properties = feature.properties || {};
+            const type = String(
+              feature.properties.Type || ''
+            ).toLowerCase();
+
+            feature.properties.story_type =
+              type === 'home village'
+                ? 'home'
+                : type === 'pasture'
+                  ? 'destination'
+                  : 'stop';
+          }
+        );
+
         map.addSource(
           'ladakh-story-route',
           {
@@ -6214,27 +6230,41 @@ map.on(
 
         map.addLayer({
           id: 'ladakh-route-points',
-          type: 'circle',
+          type: 'symbol',
           source: 'ladakh-story-points',
           layout: {
-            visibility: 'none'
+            visibility: 'none',
+            'text-field': [
+              'match',
+              ['get', 'story_type'],
+              'home',
+              '△',
+              'destination',
+              '◇',
+              '●'
+            ],
+            'text-size': [
+              'match',
+              ['get', 'story_type'],
+              'stop',
+              17,
+              27
+            ],
+            'text-allow-overlap': true,
+            'text-ignore-placement': true
           },
           paint: {
-            'circle-radius': [
-              'interpolate',
-              ['linear'],
-              ['zoom'],
-              5,
-              3.5,
-              10,
-              5,
-              14,
-              7
+            'text-color': [
+              'match',
+              ['get', 'story_type'],
+              'home',
+              '#f3d47b',
+              'destination',
+              '#f3d47b',
+              '#f2eee4'
             ],
-            'circle-color': '#f2eee4',
-            'circle-stroke-color': 'rgba(20, 17, 13, 0.92)',
-            'circle-stroke-width': 1.5,
-            'circle-opacity': 0.98
+            'text-halo-color': 'rgba(20, 17, 13, 0.95)',
+            'text-halo-width': 2
           }
         });
 
