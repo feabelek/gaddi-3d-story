@@ -2082,82 +2082,10 @@ updateFlockPosition(value);
   }
 
 
-  const edge =
-    Math.min(
-      0.999,
-      p + 0.001
-    );
-
-  const activeGradient =
-    p >= 0.999
-      ? [
-          'interpolate',
-          ['linear'],
-          ['line-progress'],
-          0,
-          getSeasonRouteColor(season),
-          1,
-          getSeasonRouteColor(season)
-        ]
-      : [
-          'interpolate',
-          ['linear'],
-          ['line-progress'],
-          0,
-          getSeasonRouteColor(season),
-          p,
-          getSeasonRouteColor(season),
-          edge,
-          'rgba(91, 76, 56, 0)',
-          1,
-          'rgba(91, 76, 56, 0)'
-        ];
-
-
-  map.setPaintProperty(
-    'migration-route',
-    'line-gradient',
-    activeGradient
+  setRouteProgressPaint(
+    p,
+    season
   );
-
-  if (
-    map.getLayer(
-      'migration-route-highlight'
-    )
-  ) {
-
-    const highlightGradient =
-      p >= 0.999
-        ? [
-            'interpolate',
-            ['linear'],
-            ['line-progress'],
-            0,
-            'rgba(255, 238, 181, 0.78)',
-            1,
-            'rgba(255, 238, 181, 0.42)'
-          ]
-        : [
-            'interpolate',
-            ['linear'],
-            ['line-progress'],
-            0,
-            'rgba(255, 238, 181, 0.78)',
-            p,
-            'rgba(255, 238, 181, 0.42)',
-            edge,
-            'rgba(255, 238, 181, 0)',
-            1,
-            'rgba(255, 238, 181, 0)'
-          ];
-
-    map.setPaintProperty(
-      'migration-route-highlight',
-      'line-gradient',
-      highlightGradient
-    );
-
-  }
 
   flockProgress = p;
   updateFlockPosition(p);
@@ -4397,12 +4325,8 @@ async function goToChapter(
       'ispur-darcha-route-labels',
       'individual-ladakh-points',
       'individual-ladakh-labels',
-      'migration-route-casing',
-      'migration-route-base',
       'migration-route',
       'migration-route-highlight',
-      'ispur-darcha-route-casing',
-      'ispur-darcha-route',
       'shearing-location',
       'kugti-sanctuary-fill',
       'kugti-sanctuary-outline'
