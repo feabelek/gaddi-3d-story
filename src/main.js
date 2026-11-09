@@ -267,6 +267,8 @@ let routeStartProgress = 0;
 
 let flockProgress = 0;
 
+let flockTravelDirection = 1;
+
 let flockAnimationFrame = null;
 
 let route3dLayer = null;
@@ -2109,6 +2111,7 @@ function updateRouteProgress(
   const startProgress = flockProgress;
   const isAutumnReturn =
   options.migrationPhase === 'autumn-return';
+  flockTravelDirection = isAutumnReturn ? -1 : 1;
   const season =
     options.season || 'summer';
 
@@ -2401,15 +2404,17 @@ function updateFlockPosition(
 
   }
 
-  const flockProgress =
-    Math.max(
-      FLOCK_START_PROGRESS,
-      progress
-    );
+  const markerProgress = Math.max(
+    routeStartProgress,
+    Math.min(
+      1,
+      progress + flockTravelDirection * 0.0025
+    )
+  );
 
   const coordinate =
     getRouteCoordinate(
-      flockProgress
+      markerProgress
     );
 
   if (
@@ -6183,7 +6188,7 @@ map.on(
             'line-join': 'round'
           },
           paint: {
-            'line-color': '#d3a85f',
+            'line-color': '#e8ad4f',
             'line-width': [
               'interpolate',
               ['linear'],
@@ -6226,7 +6231,7 @@ map.on(
               14,
               7
             ],
-            'circle-color': '#d3a85f',
+            'circle-color': '#f2eee4',
             'circle-stroke-color': 'rgba(20, 17, 13, 0.92)',
             'circle-stroke-width': 1.5,
             'circle-opacity': 0.98
