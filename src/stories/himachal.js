@@ -459,6 +459,27 @@ bearing: -101.59,
     showLegend: true
   },
 
+  // SUMMER ROUTE OVERVIEW
+  {
+    id: 'summer-route-overview',
+    season: 'summer',
+    eyebrow: 'The Migration · Summer Route',
+    title: 'A journey across landscapes',
+    location: 'Bharmour → Darcha',
+    text: `After the summer grazing, the route can be seen at
+      the scale of the whole mountain journey before the story
+      begins its return toward the winter pastures.`,
+    detail: `The overview holds the summer route in view while
+      the flock prepares to retrace the path.`,
+    center: [76.923171, 32.542367],
+    zoom: 10.042,
+    pitch: 30.5,
+    bearing: -68.06,
+    routeProgress: 1,
+    showKugtiContext: true,
+    showLegend: true
+  },
+
   // WINTER RETURN
   {
     id: 'hadsar-autumn',

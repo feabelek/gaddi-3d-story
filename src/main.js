@@ -1457,7 +1457,6 @@ function getChapterSeason(chapter) {
   if (
     activeStoryId === 'himachal'
     && chapter?.id !== 'himachal'
-    && chapter?.id !== 'summer-route-overview'
     && chapter?.id !== 'full-route'
   ) {
     return 'summer';
@@ -1604,6 +1603,12 @@ function updateProgressStopsForStory() {
         );
         stop.querySelector('span').textContent =
           String(index + 1).padStart(2, '0');
+        const season = getChapterSeason(chapter);
+        stop.dataset.season = season || '';
+        stop.style.setProperty(
+          '--stop-season-color',
+          SEASON_COLORS[season] || '#171a15'
+        );
       }
     }
   );
