@@ -260,6 +260,8 @@ let routeDistances = [];
 
 let routeLength = 0;
 
+let routeStartProgress = 0;
+
 let flockProgress = 0;
 
 let flockAnimationFrame = null;
@@ -1830,9 +1832,45 @@ function setRouteProgressPaint(
 
   const visibleProgress =
     Math.max(
-      FLOCK_START_PROGRESS,
+      routeStartProgress,
       progress
     );
+
+  if (
+    visibleProgress <= routeStartProgress
+  ) {
+    map.setPaintProperty(
+      'migration-route',
+      'line-gradient',
+      [
+        'interpolate',
+        ['linear'],
+        ['line-progress'],
+        0,
+        'rgba(91, 76, 56, 0)',
+        1,
+        'rgba(91, 76, 56, 0)'
+      ]
+    );
+
+    if (map.getLayer('migration-route-highlight')) {
+      map.setPaintProperty(
+        'migration-route-highlight',
+        'line-gradient',
+        [
+          'interpolate',
+          ['linear'],
+          ['line-progress'],
+          0,
+          'rgba(91, 76, 56, 0)',
+          1,
+          'rgba(91, 76, 56, 0)'
+        ]
+      );
+    }
+
+    return;
+  }
 
   const edge = Math.min(
     0.999,
@@ -1845,6 +1883,10 @@ function setRouteProgressPaint(
         ['linear'],
         ['line-progress'],
         0,
+        'rgba(91, 76, 56, 0)',
+        routeStartProgress,
+        'rgba(91, 76, 56, 0)',
+        visibleProgress,
         routeColor,
         1,
         routeColor
@@ -1854,7 +1896,9 @@ function setRouteProgressPaint(
         ['linear'],
         ['line-progress'],
         0,
-        routeColor,
+        'rgba(91, 76, 56, 0)',
+        routeStartProgress,
+        'rgba(91, 76, 56, 0)',
         visibleProgress,
         routeColor,
         edge,
@@ -2430,6 +2474,11 @@ function prepareRouteCoordinates(
     routeDistances.push(routeLength);
 
   }
+
+  routeStartProgress =
+    getRouteProgressForCoordinate(
+      [76.5326151804133, 32.4444683599394]
+    ) || 0;
 
 }
 
@@ -3274,12 +3323,8 @@ function updateMapVisibility() {
     'ispur-darcha-route-labels',
     'individual-ladakh-points',
     'individual-ladakh-labels',
-    'migration-route-casing',
-    'migration-route-base',
     'migration-route',
     'migration-route-highlight',
-    'ispur-darcha-route-casing',
-    'ispur-darcha-route',
     'shearing-location',
     'kugti-sanctuary-fill',
     'kugti-sanctuary-outline',
@@ -4039,8 +4084,8 @@ async function enterStateCaseStudy(caseStudy) {
     currentStoryIndex =
       0;
 
-    flockProgress = 0;
-    updateFlockPosition(0);
+    flockProgress = routeStartProgress;
+    updateFlockPosition(routeStartProgress);
 
 
     // India → Himachal.
@@ -4204,8 +4249,8 @@ async function returnToAtlas() {
     updateProgressStopsForStory();
     updateSeasonIndicator();
 
-    flockProgress = 0;
-    updateFlockPosition(0);
+    flockProgress = routeStartProgress;
+    updateFlockPosition(routeStartProgress);
 
 
     updateMapVisibility();
@@ -4391,10 +4436,11 @@ if (Number.isFinite(targetProgress)) {
 
   if (isInitialBharmour) {
 
-    updateRouteProgress(
+  updateRouteProgress(
     targetProgress,
     {
       duration: 0,
+      animate: false,
       migrationPhase: 'summer',
       season: getChapterSeason(destination)
     }
@@ -4990,7 +5036,7 @@ map.on(
         anchor: 'center'
       })
         .setLngLat(
-          getRouteCoordinate(0)
+          getRouteCoordinate(routeStartProgress)
           || STORY[1].center
         )
         .addTo(map);
