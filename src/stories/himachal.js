@@ -459,31 +459,6 @@ bearing: -101.59,
     showLegend: true
   },
 
-  // SUMMER ROUTE OVERVIEW
-  {
-    id: 'summer-route-overview',
-    eyebrow: 'The Migration',
-    title: 'A journey across landscapes',
-    location: 'Bharmour → Darcha',
-    text: `After the summer grazing, Mohanlal begins his journey back to the home village and then to the winter pastures,
-      moving through the high and low elevations during September and October to complete his annual cycle.
-      Viewing the full route highlights how a single community’s migration shapes its entire way of life.`,
-    detail: `For the Gaddi pastoralists, transhumance is a living connection between people, animals,
-      landscapes, and traditions. Through their seasonal movements, shepherds sustain local economies,
-      maintain cultural heritage, and care for fragile mountain ecosystems.
-  `,
-    center: [76.923171, 32.542367],
-    zoom: 10.042,
-    pitch: 30.5,
-    bearing: -68.06,
-    routeProgress: 1,
-    showKugtiContext: true,
-    image: null,
-    secondImage: null,
-    showLegend: true
-  },
-
-
   // WINTER RETURN
   {
     id: 'hadsar-autumn',
