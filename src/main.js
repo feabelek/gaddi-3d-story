@@ -3239,13 +3239,17 @@ function updateMapVisibility() {
   [
     'migration-route-base',
     'migration-route',
-    'migration-route-highlight'
+    'migration-route-highlight',
+    'route-points',
+    'ladakh-route-points'
   ].forEach(
     (layerId) => {
       if (map.getLayer(layerId)) {
         map.setPaintProperty(
           layerId,
-          'line-color',
+          layerId.endsWith('points')
+            ? 'text-color'
+            : 'line-color',
           activeRouteColor
         );
       }
@@ -5737,9 +5741,9 @@ map.on(
             ],
 
             'stop',
-            17,
+            13,
 
-            27
+            19
 
           ],
 
@@ -6245,8 +6249,8 @@ map.on(
               'match',
               ['get', 'story_type'],
               'stop',
-              17,
-              27
+              13,
+              19
             ],
             'text-allow-overlap': true,
             'text-ignore-placement': true
