@@ -14,6 +14,7 @@ import {
   CASE_STUDIES,
   CHAPTER_DIALOGUES as HIMACHAL_DIALOGUES,
   IMAGES,
+  ELEVATION_RANGES,
   SEASON_COLORS,
   SEASON_CYCLES,
   STORY as HIMACHAL_STORY,
@@ -233,6 +234,8 @@ let activeDialogues = HIMACHAL_DIALOGUES;
 let activeStoryId = 'himachal';
 
 let activeSeasonCycle = SEASON_CYCLES.himachal;
+
+let activeElevationRange = ELEVATION_RANGES.himachal;
 
 let atlasMode = true;
 
@@ -723,6 +726,24 @@ storyPanel.innerHTML = `
         id="season-indicator-track"
         role="list"
       ></div>
+    </div>
+
+    <div
+      id="elevation-meter"
+      aria-label="Current elevation"
+      hidden
+    >
+      <div class="elevation-meter-heading">
+        <span>Elevation</span>
+        <strong id="elevation-meter-value">—</strong>
+      </div>
+      <div class="elevation-meter-track">
+        <div id="elevation-meter-fill"></div>
+      </div>
+      <div class="elevation-meter-range">
+        <span>0 m</span>
+        <span id="elevation-meter-high">5,200 m</span>
+      </div>
     </div>
 
     <section id="story-dialogue" hidden>
@@ -1392,6 +1413,30 @@ const seasonIndicatorTrack =
   );
 
 
+const elevationMeter =
+  document.querySelector(
+    '#elevation-meter'
+  );
+
+
+const elevationMeterValue =
+  document.querySelector(
+    '#elevation-meter-value'
+  );
+
+
+const elevationMeterFill =
+  document.querySelector(
+    '#elevation-meter-fill'
+  );
+
+
+const elevationMeterHigh =
+  document.querySelector(
+    '#elevation-meter-high'
+  );
+
+
 function getChapterSeason(chapter) {
   if (chapter?.season) {
     return chapter.season;
@@ -1444,6 +1489,44 @@ function updateSeasonIndicator() {
     activeSeasonCycle.find(
       (item) => item.id === season
     )?.label || '';
+}
+
+
+function updateElevationMeter(chapter) {
+  const coordinate = chapter?.routeStop;
+
+  if (
+    !Array.isArray(coordinate)
+    || coordinate.length !== 2
+    || !map
+  ) {
+    elevationMeter.hidden = true;
+    return;
+  }
+
+  const elevation = map.queryTerrainElevation(
+    coordinate,
+    { exaggerated: false }
+  );
+
+  if (!Number.isFinite(elevation)) {
+    elevationMeter.hidden = true;
+    return;
+  }
+
+  const [minimum, maximum] = activeElevationRange;
+  const percentage = Math.max(
+    0,
+    Math.min(
+      100,
+      ((elevation - minimum) / (maximum - minimum)) * 100
+    )
+  );
+
+  elevationMeter.hidden = false;
+  elevationMeterValue.textContent = `${Math.round(elevation).toLocaleString()} m`;
+  elevationMeterHigh.textContent = `${maximum.toLocaleString()} m`;
+  elevationMeterFill.style.width = `${percentage}%`;
 }
 
 
@@ -1620,6 +1703,7 @@ function updateStoryPanel() {
 
 
       updateSeasonIndicator();
+      updateElevationMeter(chapter);
 
 
       // ======================================================
@@ -3972,6 +4056,8 @@ async function enterStateCaseStudy(caseStudy) {
   activeStoryId = storyConfig.id;
   activeSeasonCycle =
     storyConfig.seasons || SEASON_CYCLES.himachal;
+  activeElevationRange =
+    storyConfig.elevationRange || ELEVATION_RANGES.himachal;
   updateProgressStopsForStory();
 
 
@@ -4174,8 +4260,10 @@ async function returnToAtlas() {
     activeDialogues = HIMACHAL_DIALOGUES;
     activeStoryId = 'himachal';
     activeSeasonCycle = SEASON_CYCLES.himachal;
+    activeElevationRange = ELEVATION_RANGES.himachal;
     updateProgressStopsForStory();
     updateSeasonIndicator();
+    updateElevationMeter(STORY[0]);
 
     flockProgress = routeStartProgress;
     updateFlockPosition(routeStartProgress);

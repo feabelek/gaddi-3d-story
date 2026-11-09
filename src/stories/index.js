@@ -13,6 +13,7 @@ import {
   STORY as LADAKH_STORY
 } from './ladakh.js';
 import {
+  ELEVATION_RANGES,
   SEASON_COLORS,
   SEASON_CYCLES
 } from './seasons.js';
@@ -25,21 +26,24 @@ export const STORY_REGISTRY = {
     chapters: STORY,
     dialogues: CHAPTER_DIALOGUES,
     images: IMAGES,
-    seasons: SEASON_CYCLES.himachal
+    seasons: SEASON_CYCLES.himachal,
+    elevationRange: ELEVATION_RANGES.himachal
   },
   ladakh: {
     id: 'ladakh',
     chapters: LADAKH_STORY,
     dialogues: LADAKH_DIALOGUES,
     images: {},
-    seasons: SEASON_CYCLES.ladakh
+    seasons: SEASON_CYCLES.ladakh,
+    elevationRange: ELEVATION_RANGES.ladakh
   },
   arunachal: {
     id: 'arunachal',
     chapters: ARUNACHAL_STORY,
     dialogues: ARUNACHAL_DIALOGUES,
     images: {},
-    seasons: SEASON_CYCLES.arunachal
+    seasons: SEASON_CYCLES.arunachal,
+    elevationRange: ELEVATION_RANGES.arunachal
   }
 };
 
@@ -50,5 +54,6 @@ export {
   IMAGES,
   STORY,
   SEASON_COLORS,
-  SEASON_CYCLES
+  SEASON_CYCLES,
+  ELEVATION_RANGES
 };

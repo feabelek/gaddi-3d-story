@@ -808,6 +808,57 @@ body::after {
 }
 
 
+#elevation-meter {
+  width: 100%;
+  max-width: 370px;
+  margin: -7px 0 20px;
+}
+
+
+.elevation-meter-heading,
+.elevation-meter-range {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+
+  color: rgba(246, 242, 233, 0.5);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+
+.elevation-meter-heading strong {
+  color: #f2d18d;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+
+.elevation-meter-track {
+  width: 100%;
+  height: 4px;
+  margin: 6px 0 4px;
+  overflow: hidden;
+
+  background: rgba(255, 255, 255, 0.16);
+}
+
+
+#elevation-meter-fill {
+  width: 0%;
+  height: 100%;
+
+  background: linear-gradient(
+    90deg,
+    #2d91d8,
+    #f18700
+  );
+
+  transition: width 700ms ease;
+}
+
+
 #story-dialogue[hidden],
 #story-dialogue-expanded[hidden] {
   display: none;

@@ -22,3 +22,10 @@ export const SEASON_CYCLES = {
     { id: 'winter', label: 'Winter' }
   ]
 };
+
+
+export const ELEVATION_RANGES = {
+  himachal: [0, 5200],
+  ladakh: [0, 6000],
+  arunachal: [0, 5000]
+};
