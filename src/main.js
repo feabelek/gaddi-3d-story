@@ -14,6 +14,8 @@ import {
   CASE_STUDIES,
   CHAPTER_DIALOGUES as HIMACHAL_DIALOGUES,
   IMAGES,
+  SEASON_COLORS,
+  SEASON_CYCLES,
   STORY as HIMACHAL_STORY,
   STORY_REGISTRY
 } from './stories/index.js';
@@ -229,6 +231,8 @@ let STORY = HIMACHAL_STORY;
 let activeDialogues = HIMACHAL_DIALOGUES;
 
 let activeStoryId = 'himachal';
+
+let activeSeasonCycle = SEASON_CYCLES.himachal;
 
 let atlasMode = true;
 
@@ -704,6 +708,20 @@ storyPanel.innerHTML = `
     <h1 id="story-title"></h1>
 
     <div id="story-location"></div>
+
+    <div
+      id="season-indicator"
+      aria-label="Seasonal migration cycle"
+    >
+      <div class="season-indicator-heading">
+        <span>Seasonal cycle</span>
+        <strong id="season-indicator-label">Summer</strong>
+      </div>
+      <div
+        id="season-indicator-track"
+        role="list"
+      ></div>
+    </div>
 
     <section id="story-dialogue" hidden>
       <div class="story-dialogue-label">Voice from the route</div>
@@ -1354,6 +1372,79 @@ const locationElement =
   );
 
 
+const seasonIndicator =
+  document.querySelector(
+    '#season-indicator'
+  );
+
+
+const seasonIndicatorLabel =
+  document.querySelector(
+    '#season-indicator-label'
+  );
+
+
+const seasonIndicatorTrack =
+  document.querySelector(
+    '#season-indicator-track'
+  );
+
+
+function getChapterSeason(chapter) {
+  if (chapter?.season) {
+    return chapter.season;
+  }
+
+  if (
+    chapter?.migrationPhase === 'autumn-return'
+  ) {
+    return [
+      'hadsar-autumn',
+      'gadderan-belt'
+    ].includes(chapter.id)
+      ? 'transit'
+      : 'winter';
+  }
+
+  if (
+    activeStoryId === 'himachal'
+    && chapter?.id !== 'himachal'
+    && chapter?.id !== 'summer-route-overview'
+    && chapter?.id !== 'full-route'
+  ) {
+    return 'summer';
+  }
+
+  return null;
+}
+
+
+function updateSeasonIndicator() {
+  const chapter = STORY[currentStoryIndex];
+  const season = getChapterSeason(chapter);
+
+  seasonIndicatorTrack.innerHTML =
+    activeSeasonCycle.map(
+      (item) => `
+        <span
+          class="season-indicator-segment${item.id === season ? ' active' : ''}"
+          role="listitem"
+          data-season="${item.id}"
+          style="--season-color: ${SEASON_COLORS[item.id]}"
+        >
+          ${item.label}
+        </span>
+      `
+    ).join('');
+
+  seasonIndicator.hidden = !season;
+  seasonIndicatorLabel.textContent =
+    activeSeasonCycle.find(
+      (item) => item.id === season
+    )?.label || '';
+}
+
+
 const dialogueElement =
   document.querySelector(
     '#story-dialogue'
@@ -1524,6 +1615,9 @@ function updateStoryPanel() {
 
       detailElement.textContent =
         chapter.detail || '';
+
+
+      updateSeasonIndicator();
 
 
       // ======================================================
@@ -1719,9 +1813,20 @@ progressStops.forEach(
 // ROUTE PROGRESS
 // ============================================================
 
-function setRouteProgressPaint(
-  progress
+function getSeasonRouteColor(
+  season = 'summer'
 ) {
+  return SEASON_COLORS[season]
+    || SEASON_COLORS.summer;
+}
+
+function setRouteProgressPaint(
+  progress,
+  season = 'summer'
+) {
+
+  const routeColor =
+    getSeasonRouteColor(season);
 
   const visibleProgress =
     Math.max(
@@ -1740,18 +1845,18 @@ function setRouteProgressPaint(
         ['linear'],
         ['line-progress'],
         0,
-        '#d89535',
+        routeColor,
         1,
-        '#e8ad4f'
+        routeColor
       ]
     : [
         'interpolate',
         ['linear'],
         ['line-progress'],
         0,
-        '#d89535',
-            visibleProgress,
-        '#e8ad4f',
+        routeColor,
+        visibleProgress,
+        routeColor,
         edge,
         'rgba(91, 76, 56, 0)',
         1,
@@ -1789,7 +1894,10 @@ function setRouteProgressPaint(
 
 }
 
-function setAutumnRouteProgressPaint(progress) {
+function setAutumnRouteProgressPaint(
+  progress,
+  season = 'transit'
+) {
 
   if (!map.getLayer('migration-route')) {
     return;
@@ -1800,6 +1908,7 @@ function setAutumnRouteProgressPaint(progress) {
   }
 
   const p = Math.max(0, Math.min(1, progress));
+  const routeColor = getSeasonRouteColor(season);
 
   // Keep the gradient stops strictly increasing.
   const start = Math.max(0, p - 0.001);
@@ -1813,9 +1922,9 @@ function setAutumnRouteProgressPaint(progress) {
 
     start, 'rgba(91, 76, 56, 0)',
 
-    p, '#D9D9D9',
+    p, routeColor,
 
-    1, '#D9D9D9'
+    1, routeColor
   ];
 
   map.setPaintProperty(
@@ -1872,6 +1981,8 @@ function updateRouteProgress(
   const startProgress = flockProgress;
   const isAutumnReturn =
   options.migrationPhase === 'autumn-return';
+  const season =
+    options.season || 'summer';
 
   if (
     options.animate !== false
@@ -1880,6 +1991,7 @@ function updateRouteProgress(
 
     const startedAt = performance.now();
     const duration = options.duration
+      ||
        Math.min(
         1800,
         Math.max(700, Math.abs(p - startProgress) * 2600)
@@ -1891,9 +2003,9 @@ function updateRouteProgress(
       const value = startProgress + (p - startProgress) * eased;
 
       if (isAutumnReturn) {
-  setAutumnRouteProgressPaint(value);
+  setAutumnRouteProgressPaint(value, season);
 } else {
-  setRouteProgressPaint(value);
+  setRouteProgressPaint(value, season);
 }
 
 flockProgress = value;
@@ -1926,18 +2038,18 @@ updateFlockPosition(value);
           ['linear'],
           ['line-progress'],
           0,
-          '#d89535',
+          getSeasonRouteColor(season),
           1,
-          '#e8ad4f'
+          getSeasonRouteColor(season)
         ]
       : [
           'interpolate',
           ['linear'],
           ['line-progress'],
           0,
-          '#d89535',
+          getSeasonRouteColor(season),
           p,
-          '#e8ad4f',
+          getSeasonRouteColor(season),
           edge,
           'rgba(91, 76, 56, 0)',
           1,
@@ -3043,6 +3155,26 @@ function updateMapVisibility() {
       ? 'visible'
       : 'none';
 
+  const activeRouteColor = getSeasonRouteColor(
+    getChapterSeason(STORY[currentStoryIndex])
+  );
+
+  [
+    'migration-route-base',
+    'migration-route',
+    'migration-route-highlight'
+  ].forEach(
+    (layerId) => {
+      if (map.getLayer(layerId)) {
+        map.setPaintProperty(
+          layerId,
+          'line-color',
+          activeRouteColor
+        );
+      }
+    }
+  );
+
 
   if (
     route3dLayer
@@ -3243,7 +3375,12 @@ function updateMapVisibility() {
           STORY[
             currentStoryIndex
           ]
-        )
+        ),
+        {
+          season: getChapterSeason(
+            STORY[currentStoryIndex]
+          )
+        }
 
       );
 
@@ -3847,6 +3984,8 @@ async function enterStateCaseStudy(caseStudy) {
   STORY = storyConfig.chapters;
   activeDialogues = storyConfig.dialogues;
   activeStoryId = storyConfig.id;
+  activeSeasonCycle =
+    storyConfig.seasons || SEASON_CYCLES.himachal;
   updateProgressStopsForStory();
 
 
@@ -4048,7 +4187,9 @@ async function returnToAtlas() {
     STORY = HIMACHAL_STORY;
     activeDialogues = HIMACHAL_DIALOGUES;
     activeStoryId = 'himachal';
+    activeSeasonCycle = SEASON_CYCLES.himachal;
     updateProgressStopsForStory();
+    updateSeasonIndicator();
 
     flockProgress = 0;
     updateFlockPosition(0);
@@ -4237,11 +4378,12 @@ if (Number.isFinite(targetProgress)) {
 
   if (isInitialBharmour) {
 
-  updateRouteProgress(
+    updateRouteProgress(
     targetProgress,
     {
       duration: 0,
-      migrationPhase: 'summer'
+      migrationPhase: 'summer',
+      season: getChapterSeason(destination)
     }
   );
 
@@ -4253,7 +4395,8 @@ if (Number.isFinite(targetProgress)) {
       duration: transitionDuration,
       migrationPhase: isAutumnReturn
         ? 'autumn-return'
-        : 'summer'
+        : 'summer',
+      season: getChapterSeason(destination)
     }
   );
 
@@ -4274,7 +4417,8 @@ if (Number.isFinite(targetProgress)) {
     updateRouteProgress(
       0,
       {
-        duration: transitionDuration
+        duration: transitionDuration,
+        season: getChapterSeason(destination)
       }
     );
 

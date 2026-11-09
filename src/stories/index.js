@@ -12,6 +12,10 @@ import {
   CHAPTER_DIALOGUES as LADAKH_DIALOGUES,
   STORY as LADAKH_STORY
 } from './ladakh.js';
+import {
+  SEASON_COLORS,
+  SEASON_CYCLES
+} from './seasons.js';
 
 
 export const STORY_REGISTRY = {
@@ -20,19 +24,22 @@ export const STORY_REGISTRY = {
     caseStudies: CASE_STUDIES,
     chapters: STORY,
     dialogues: CHAPTER_DIALOGUES,
-    images: IMAGES
+    images: IMAGES,
+    seasons: SEASON_CYCLES.himachal
   },
   ladakh: {
     id: 'ladakh',
     chapters: LADAKH_STORY,
     dialogues: LADAKH_DIALOGUES,
-    images: {}
+    images: {},
+    seasons: SEASON_CYCLES.ladakh
   },
   arunachal: {
     id: 'arunachal',
     chapters: ARUNACHAL_STORY,
     dialogues: ARUNACHAL_DIALOGUES,
-    images: {}
+    images: {},
+    seasons: SEASON_CYCLES.arunachal
   }
 };
 
@@ -41,5 +48,7 @@ export {
   CASE_STUDIES,
   CHAPTER_DIALOGUES,
   IMAGES,
-  STORY
+  STORY,
+  SEASON_COLORS,
+  SEASON_CYCLES
 };
