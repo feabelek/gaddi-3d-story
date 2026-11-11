@@ -51,11 +51,17 @@ This marks the onset of another season of migration.`,
     eyebrow: 'Ladakh · Summer Grazing',
     title: 'Moving toward the summer pastures',
     location: 'Korzok Phu',
-    text: `From Korzok, the flock moves toward Korzok Phu and
-      the high summer grazing grounds. The route follows the
-      seasonal availability of grass and water.`,
-    detail: `Summer pasture is temporary, but the knowledge of
-      how to reach it is carried across generations.`,
+    text: `By July, Nawang Tashi has settled his flock of 300 livestock in the extremely high-altitude valley of Korzok Phu.
+    Rising nearly 800 metres above the village, this high alpine bowl is an important summer grazing ground.
+    They will stay in these highlands till October. Here, snowmelt streams
+    run down the slopes, bringing moisture to patches of grass and herbs that emerge during the short growing season.`,
+    detail: `The camp is pitched and the family's routine settles around the herd: grazing through the day,
+     tending to the animals and returning to camp in the evening.
+     Korzok Phu is also a meeting point in the wider pastoral cycle.
+     Historical accounts describe Korzok families coming together here after the early summer dispersal to different grazing areas around
+     Tso Moriri and the southern valleys.
+      The highlands are critical for the development of Pashmina.
+      Prolonged exposure to extreme cold & altitude are part of the environmental conditions under which the fine pashmina undercoat develops.`,
     center: [78.155128, 33.037958],
     zoom: 13.714,
     pitch: 68,
