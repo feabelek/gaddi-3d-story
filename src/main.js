@@ -25,6 +25,9 @@ import {
   createCameraComposer,
   getCurrentCamera
 } from './atlas/camera-composer.js';
+import { createMiniMap } from './atlas/mini-map.js';
+import { createElevationProfile } from './atlas/elevation-profile.js';
+import { createJourneyControls } from './atlas/journey-controls.js';
 
 import {
   MAP_ASSETS
@@ -235,6 +238,7 @@ let activeStoryId = 'himachal';
 let activeSeasonCycle = SEASON_CYCLES.himachal;
 
 let activeElevationRange = ELEVATION_RANGES.himachal;
+let activeStoryConfig = STORY_REGISTRY.himachal;
 
 let atlasMode = true;
 
@@ -278,6 +282,12 @@ const FLOCK_START_PROGRESS =
   0.003;
 
 let riverAnimationFrame = null;
+let journeyInterface = null;
+let journeyVisuals = null;
+let journeyControls = null;
+let miniMapController = null;
+let elevationProfileRenderer = null;
+let journeyExploreMode = false;
 
 
 const TANDI_RIVER_BOUNDS = [
@@ -466,7 +476,6 @@ const map = new maplibregl.Map({
     512
 
 });
-
 
 // ============================================================
 // MAP LIMITS
@@ -697,55 +706,9 @@ storyPanel.classList.add(
 );
 
 
-storyPanel.innerHTML = `
+  storyPanel.innerHTML = `
 
   <div class="story-panel-inner">
-
-    <button
-      id="back-to-atlas"
-      type="button"
-    >
-      ← Atlas
-    </button>
-
-
-    <div id="story-eyebrow"></div>
-
-    <h1 id="story-title"></h1>
-
-    <div id="story-location"></div>
-
-    <div
-      id="season-indicator"
-      aria-label="Seasonal migration cycle"
-    >
-      <div class="season-indicator-heading">
-        <span>Seasonal cycle</span>
-        <strong id="season-indicator-label">Summer</strong>
-      </div>
-      <div
-        id="season-indicator-track"
-        role="list"
-      ></div>
-    </div>
-
-    <div
-      id="elevation-meter"
-      aria-label="Current elevation"
-      hidden
-    >
-      <div class="elevation-meter-heading">
-        <span>Elevation</span>
-        <strong id="elevation-meter-value">—</strong>
-      </div>
-      <div class="elevation-meter-track">
-        <div id="elevation-meter-fill"></div>
-      </div>
-      <div class="elevation-meter-range">
-        <span>0 m</span>
-        <span id="elevation-meter-high">5,200 m</span>
-      </div>
-    </div>
 
     <section id="story-dialogue" hidden>
       <div class="story-dialogue-label">Voice from the route</div>
@@ -761,40 +724,6 @@ storyPanel.innerHTML = `
 
     <p id="story-detail"></p>
 
-    <div class="story-progress">
-
-      <div
-        class="story-progress-track"
-        role="tablist"
-        aria-label="Story stops"
-      >
-
-        <div class="story-progress-line">
-
-          <div id="story-progress-fill"></div>
-
-        </div>
-
-        ${STORY.map(
-          (chapter, index) => `
-            <button
-              class="story-progress-stop"
-              type="button"
-              role="tab"
-              data-story-index="${index}"
-              aria-label="Go to ${chapter.location}"
-              aria-selected="${index === 0}"
-            >
-              <span>${String(index + 1).padStart(2, '0')}</span>
-            </button>
-          `
-        ).join('')}
-
-      </div>
-
-    </div>
-
-
     <div id="story-scroll-hint">
       Scroll to continue
     </div>
@@ -807,6 +736,16 @@ storyPanel.innerHTML = `
 document.body.appendChild(
   storyPanel
 );
+
+const chapterIdentity = document.createElement('header');
+chapterIdentity.id = 'chapter-identity';
+chapterIdentity.className = 'hidden';
+chapterIdentity.innerHTML = `
+  <h1 id="story-title"></h1>
+  <div id="story-eyebrow"></div>
+  <div id="story-location"></div>
+`;
+document.body.appendChild(chapterIdentity);
 
 
 // ============================================================
@@ -1330,6 +1269,167 @@ document.body.appendChild(
   legend
 );
 
+journeyInterface = document.createElement('div');
+journeyInterface.id = 'journey-interface';
+journeyInterface.innerHTML = `
+  <section class="mini-map-panel" aria-label="Route map" hidden>
+    <div id="mini-map" aria-label="Mini-map showing the active journey"></div>
+    <div class="elevation-heading"><span>Elevation profile</span></div>
+    <svg id="elevation-profile" viewBox="0 0 320 90" role="img" aria-label="Elevation profile"></svg>
+  </section>
+  <nav id="journey-controls" class="map-toolbox" aria-label="Map controls and scale"></nav>
+`;
+document.body.appendChild(journeyInterface);
+
+journeyVisuals = journeyInterface.querySelector('.mini-map-panel');
+
+const journeyControlsContainer =
+  journeyInterface.querySelector('#journey-controls');
+
+function activeJourneyStartIndex() {
+  const startId = activeStoryConfig?.miniMap?.journeyStartChapterId;
+  return STORY.findIndex((chapter) => chapter.id === startId);
+}
+
+function journeyDataAvailable() {
+  const miniMapAvailable = Boolean(
+    activeStoryConfig?.miniMap?.enabled
+    && Object.values(activeStoryConfig.miniMap.routes || {}).some(
+      (route) => Boolean(route?.url)
+    )
+  );
+  const profileAvailable = Boolean(
+    activeStoryConfig?.elevationProfile?.enabled
+    && activeStoryConfig.elevationProfile.data
+  );
+  return { miniMapAvailable, profileAvailable };
+}
+
+function currentJourneyVisible() {
+  const startIndex = activeJourneyStartIndex();
+  const chapter = STORY[currentStoryIndex];
+  return !atlasMode
+    && startIndex >= 0
+    && currentStoryIndex >= startIndex
+    && chapter?.id !== activeStoryId;
+}
+
+function chapterLocationsForStory() {
+  return STORY
+    .map((chapter) => ({
+      chapterId: chapter.id,
+      coordinate: chapter.miniMapCoordinate || chapter.routeStop
+    }))
+    .filter((location) => Array.isArray(location.coordinate));
+}
+
+function miniMapConfigForStory() {
+  return {
+    ...(activeStoryConfig.miniMap || {}),
+    locations: chapterLocationsForStory(),
+    locationsUrl: MAP_ASSETS[activeStoryId]?.storyPoints
+  };
+}
+
+function activeJourneyRouteId(chapter = STORY[currentStoryIndex]) {
+  const routes = activeStoryConfig?.miniMap?.routes || {};
+  if (chapter?.migrationPhase === 'autumn-return' && routes.return) return 'return';
+  if (getChapterSeason(chapter) === 'winter' && routes.winter) return 'winter';
+  if (routes.summer && getChapterSeason(chapter) === 'summer') return 'summer';
+  return activeStoryConfig?.miniMap?.defaultRoute || Object.keys(routes)[0];
+}
+
+function updateJourneyPosition() {
+  if (!currentJourneyVisible()) return;
+  const chapter = STORY[currentStoryIndex];
+  const routeId = activeJourneyRouteId(chapter);
+  const progress = Number.isFinite(flockProgress)
+    ? flockProgress
+    : getStoryRouteProgress(chapter);
+  const coordinate = Number.isFinite(progress)
+    ? getRouteCoordinate(progress)
+    : null;
+  miniMapController?.setJourneyState({
+    chapter,
+    routeId,
+    progress,
+    coordinate
+  });
+}
+
+function restartActiveJourney() {
+  if (atlasMode || cameraAnimating) return;
+  const startIndex = activeJourneyStartIndex();
+  if (startIndex >= 0 && currentStoryIndex !== startIndex) {
+    goToChapter(startIndex);
+  }
+}
+
+journeyControls = createJourneyControls({
+  container: journeyControlsContainer,
+  informationContent: 'Esri, Maxar, Earthstar Geographics | MapLibre',
+  onLegendToggle: (event) => {
+    const open = !legend.classList.contains('visible');
+    legend.classList.toggle('visible', open);
+    event.currentTarget.setAttribute('aria-expanded', String(open));
+    journeyControls.setLegendExpanded(open);
+  },
+  onZoomIn: () => map.zoomIn({ duration: 500 }),
+  onZoomOut: () => map.zoomOut({ duration: 500 }),
+  onNorth: () => map.easeTo({ bearing: 0, duration: 700 }),
+  onInformation: () => {
+    const panel = journeyControlsContainer.querySelector('[data-journey-control="information-panel"]');
+    journeyControls.setInformationOpen(panel?.hidden !== false);
+  },
+  onPrevious: () => {
+    if (!atlasMode && !cameraAnimating) {
+      goToChapter(Math.max(activeJourneyStartIndex(), currentStoryIndex - 1));
+    }
+  },
+  onNext: () => {
+    if (!atlasMode && !cameraAnimating) {
+      goToChapter(Math.min(STORY.length - 1, currentStoryIndex + 1));
+    }
+  },
+  onMenuExplore: () => {
+    journeyExploreMode = !journeyExploreMode;
+    journeyExploreMode ? enableMapInteraction() : disableMapInteraction();
+    document.body.classList.toggle('exploration-mode', journeyExploreMode);
+    const exploreButton = journeyInterface.querySelector('[data-menu-action="explore"]');
+    if (exploreButton) {
+      exploreButton.textContent = journeyExploreMode ? 'Return to guided' : 'Explore map';
+    }
+  },
+  onMenuHome: () => returnToAtlas(),
+  onMenuRestart: restartActiveJourney
+});
+
+miniMapController = createMiniMap(
+  journeyInterface.querySelector('#mini-map'),
+  {
+    mapConfig: miniMapConfigForStory(),
+    onChapterSelect: (chapterId) => {
+      const index = STORY.findIndex((chapter) => chapter.id === chapterId);
+      if (index >= 0) goToChapter(index);
+    }
+  }
+);
+
+elevationProfileRenderer = createElevationProfile(
+  journeyInterface.querySelector('#elevation-profile'),
+  { profile: activeStoryConfig.elevationProfile?.data }
+);
+
+journeyControls.setControlAvailability('information', true);
+journeyControls.setControlAvailability('menu', true);
+journeyControls.setInformationOpen(false);
+journeyControls.setNorthArrow({
+  src: '/data/images/Map Scale Control.svg',
+  alt: 'North arrow'
+});
+updateJourneyInterface();
+updateJourneyScale();
+
 
 const ladakhRasterToggle =
   document.createElement('button');
@@ -1396,48 +1496,6 @@ const locationElement =
   );
 
 
-const seasonIndicator =
-  document.querySelector(
-    '#season-indicator'
-  );
-
-
-const seasonIndicatorLabel =
-  document.querySelector(
-    '#season-indicator-label'
-  );
-
-
-const seasonIndicatorTrack =
-  document.querySelector(
-    '#season-indicator-track'
-  );
-
-
-const elevationMeter =
-  document.querySelector(
-    '#elevation-meter'
-  );
-
-
-const elevationMeterValue =
-  document.querySelector(
-    '#elevation-meter-value'
-  );
-
-
-const elevationMeterFill =
-  document.querySelector(
-    '#elevation-meter-fill'
-  );
-
-
-const elevationMeterHigh =
-  document.querySelector(
-    '#elevation-meter-high'
-  );
-
-
 function getChapterSeason(chapter) {
   if (chapter?.season) {
     return chapter.season;
@@ -1465,69 +1523,88 @@ function getChapterSeason(chapter) {
   return null;
 }
 
+function updateJourneyInterface() {
+  const availability = journeyDataAvailable();
+  const journeyVisible = currentJourneyVisible();
+  const showMiniMap = journeyVisible && availability.miniMapAvailable;
+  const showProfile = journeyVisible && availability.profileAvailable;
+  const showJourneyUI = showMiniMap || showProfile;
+  if (journeyVisuals) journeyVisuals.hidden = !showJourneyUI;
+  journeyInterface.querySelector('#mini-map').hidden = !showMiniMap;
+  journeyInterface.querySelector('#elevation-profile').hidden = !showProfile;
+  journeyControls?.setVisible(showJourneyUI);
 
-function updateSeasonIndicator() {
-  const chapter = STORY[currentStoryIndex];
-  const season = getChapterSeason(chapter);
+  if (journeyVisible) updateMapVisibility();
 
-  seasonIndicatorTrack.innerHTML =
-    activeSeasonCycle.map(
-      (item) => `
-        <span
-          class="season-indicator-segment${item.id === season ? ' active' : ''}"
-          role="listitem"
-          data-season="${item.id}"
-          style="--season-color: ${SEASON_COLORS[item.id]}"
-        >
-          ${item.label}
-        </span>
-      `
-    ).join('');
-
-  seasonIndicator.hidden = !season;
-  seasonIndicatorLabel.textContent =
-    activeSeasonCycle.find(
-      (item) => item.id === season
-    )?.label || '';
-}
-
-
-function updateElevationMeter(chapter) {
-  const coordinate = chapter?.routeStop;
-
-  if (
-    !Array.isArray(coordinate)
-    || coordinate.length !== 2
-    || !map
-  ) {
-    elevationMeter.hidden = true;
-    return;
+  if (showProfile) {
+    const chapter = STORY[currentStoryIndex];
+    const datasetId = chapter?.migrationPhase === 'autumn-return'
+      || getChapterSeason(chapter) === 'winter'
+      ? 'winter'
+      : 'summer';
+    elevationProfileRenderer?.setJourneyState({ chapter, datasetId });
   }
 
-  const elevation = map.queryTerrainElevation(
-    coordinate,
-    { exaggerated: false }
-  );
-
-  if (!Number.isFinite(elevation)) {
-    elevationMeter.hidden = true;
-    return;
-  }
-
-  const [minimum, maximum] = activeElevationRange;
-  const percentage = Math.max(
-    0,
-    Math.min(
-      100,
-      ((elevation - minimum) / (maximum - minimum)) * 100
-    )
-  );
-
-  elevationMeter.hidden = false;
-  elevationMeterValue.textContent = `${Math.round(elevation).toLocaleString()} m`;
-  elevationMeterHigh.textContent = `${maximum.toLocaleString()} m`;
-  elevationMeterFill.style.width = `${percentage}%`;
+  if (showJourneyUI) updateJourneyPosition();
 }
+
+function haversineDistance(first, second) {
+  const earthRadius = 6371008.8;
+  const radians = (value) => value * Math.PI / 180;
+  const latitudeDelta = radians(second.lat - first.lat);
+  const longitudeDelta = radians(second.lng - first.lng);
+  const firstLatitude = radians(first.lat);
+  const secondLatitude = radians(second.lat);
+  const value = Math.sin(latitudeDelta / 2) ** 2
+    + Math.cos(firstLatitude) * Math.cos(secondLatitude)
+    * Math.sin(longitudeDelta / 2) ** 2;
+  return earthRadius * 2 * Math.atan2(Math.sqrt(value), Math.sqrt(1 - value));
+}
+
+function readableScaleDistance(distance) {
+  const exponent = 10 ** Math.floor(Math.log10(Math.max(1, distance)));
+  const normalized = distance / exponent;
+  const step = normalized >= 5 ? 5 : normalized >= 2 ? 2 : 1;
+  return step * exponent;
+}
+
+function formatScaleDistance(distance) {
+  return distance >= 1000
+    ? `${distance / 1000 >= 10 ? Math.round(distance / 1000) : (distance / 1000).toFixed(1)} km`
+    : `${Math.round(distance)} m`;
+}
+
+function updateJourneyScale() {
+  if (!map.loaded()) return;
+  const bounds = map.getContainer().getBoundingClientRect();
+  const sampleWidth = 160;
+  const sampleY = bounds.height * 0.68;
+  const sampleX = Math.max(20, bounds.width / 2 - sampleWidth / 2);
+  const first = map.unproject([sampleX, sampleY]);
+  const second = map.unproject([sampleX + sampleWidth, sampleY]);
+  const visibleDistance = haversineDistance(first, second);
+  const displayedDistance = readableScaleDistance(visibleDistance);
+  const lineWidth = Math.max(
+    72,
+    Math.min(sampleWidth, sampleWidth * displayedDistance / visibleDistance)
+  );
+  journeyControls?.setScaleContent({
+    label: formatScaleDistance(displayedDistance),
+    width: lineWidth
+  });
+  journeyControls?.setNorthArrow({
+    src: '/data/images/Map Scale Control.svg',
+    alt: 'North arrow',
+    rotation: map.getBearing()
+  });
+}
+
+map.on('load', updateJourneyScale);
+map.on('move', updateJourneyScale);
+map.on('resize', updateJourneyScale);
+map.on('zoom', updateJourneyScale);
+map.on('pitch', updateJourneyScale);
+map.on('rotate', updateJourneyScale);
 
 
 const dialogueElement =
@@ -1578,17 +1655,7 @@ const mediaElement =
   );
 
 
-const progressFill =
-  document.querySelector(
-    '#story-progress-fill'
-  );
-
-
-const progressStops = [
-  ...document.querySelectorAll(
-    '.story-progress-stop'
-  )
-];
+const progressStops = [];
 
 
 function updateProgressStopsForStory() {
@@ -1621,12 +1688,6 @@ const scrollHint =
   );
 
 
-const backToAtlasButton =
-  document.querySelector(
-    '#back-to-atlas'
-  );
-
-
 const storyPanelInner =
   storyPanel.querySelector(
     '.story-panel-inner'
@@ -1656,7 +1717,6 @@ function updateStoryPanel() {
     STORY[
       currentStoryIndex
     ];
-
 
   storyPanel.classList.add(
     'changing'
@@ -1706,10 +1766,6 @@ function updateStoryPanel() {
 
       detailElement.textContent =
         chapter.detail || '';
-
-
-      updateSeasonIndicator();
-      updateElevationMeter(chapter);
 
 
       // ======================================================
@@ -1784,75 +1840,6 @@ function updateStoryPanel() {
 
 
       // ======================================================
-      // PROGRESS
-      // ======================================================
-
-      const progress =
-        (
-          currentStoryIndex
-          /
-          (
-            STORY.length - 1
-          )
-        )
-        *
-        100;
-
-
-      progressFill.style.width =
-        `${progress}%`;
-
-
-      progressStops.forEach(
-        (stop, index) => {
-          const isCurrent =
-            index === currentStoryIndex;
-
-          stop.classList.toggle(
-            'active',
-            isCurrent
-          );
-
-          stop.classList.toggle(
-            'visited',
-            index <= currentStoryIndex
-          );
-
-          stop.setAttribute(
-            'aria-selected',
-            String(isCurrent)
-          );
-
-          if (isCurrent) {
-            stop.setAttribute(
-              'aria-current',
-              'step'
-            );
-          }
-          else {
-            stop.removeAttribute(
-              'aria-current'
-            );
-          }
-
-        }
-      );
-
-
-      // ======================================================
-      // LEGEND
-      // ======================================================
-
-      legend.classList.toggle(
-
-        'visible',
-
-        chapter.showLegend
-
-      );
-
-
-      // ======================================================
       // HINT
       // ======================================================
 
@@ -1872,6 +1859,8 @@ function updateStoryPanel() {
           'Scroll to continue';
 
       }
+
+      updateJourneyInterface();
 
 
       storyPanel.classList.remove(
@@ -1912,50 +1901,67 @@ function getSeasonRouteColor(
     || SEASON_COLORS.summer;
 }
 
+function createRouteProgressGradient(
+  stops
+) {
+  const gradient = [
+    'interpolate',
+    ['linear'],
+    ['line-progress']
+  ];
+  let previousInput = -Infinity;
+
+  stops.forEach(([input, color]) => {
+    if (
+      Number.isFinite(input)
+      && input > previousInput
+    ) {
+      gradient.push(input, color);
+      previousInput = input;
+    }
+  });
+
+  return gradient;
+}
+
 function setRouteProgressPaint(
   progress,
   season = 'summer'
 ) {
 
+  if (!Number.isFinite(progress)) return;
+
   const routeColor =
     getSeasonRouteColor(season);
 
+  const startProgress = Math.max(
+    0,
+    Math.min(1, routeStartProgress)
+  );
   const visibleProgress =
     Math.max(
-      routeStartProgress,
-      progress
+      startProgress,
+      Math.min(1, progress)
     );
 
   if (
-    visibleProgress <= routeStartProgress
+    visibleProgress <= startProgress
   ) {
+    const gradient = createRouteProgressGradient([
+      [0, 'rgba(91, 76, 56, 0)'],
+      [1, 'rgba(91, 76, 56, 0)']
+    ]);
     map.setPaintProperty(
       'migration-route',
       'line-gradient',
-      [
-        'interpolate',
-        ['linear'],
-        ['line-progress'],
-        0,
-        'rgba(91, 76, 56, 0)',
-        1,
-        'rgba(91, 76, 56, 0)'
-      ]
+      gradient
     );
 
     if (map.getLayer('migration-route-highlight')) {
       map.setPaintProperty(
         'migration-route-highlight',
         'line-gradient',
-        [
-          'interpolate',
-          ['linear'],
-          ['line-progress'],
-          0,
-          'rgba(91, 76, 56, 0)',
-          1,
-          'rgba(91, 76, 56, 0)'
-        ]
+        gradient
       );
     }
 
@@ -1967,35 +1973,22 @@ function setRouteProgressPaint(
     visibleProgress + 0.001
   );
 
-  const gradient = visibleProgress >= 0.999
-    ? [
-        'interpolate',
-        ['linear'],
-        ['line-progress'],
-        0,
-        'rgba(91, 76, 56, 0)',
-        routeStartProgress,
-        'rgba(91, 76, 56, 0)',
-        visibleProgress,
-        routeColor,
-        1,
-        routeColor
-      ]
-    : [
-        'interpolate',
-        ['linear'],
-        ['line-progress'],
-        0,
-        'rgba(91, 76, 56, 0)',
-        routeStartProgress,
-        'rgba(91, 76, 56, 0)',
-        visibleProgress,
-        routeColor,
-        edge,
-        'rgba(91, 76, 56, 0)',
-        1,
-        'rgba(91, 76, 56, 0)'
-      ];
+  const gradient = createRouteProgressGradient(
+    visibleProgress >= 0.999
+      ? [
+          [0, 'rgba(91, 76, 56, 0)'],
+          [startProgress, 'rgba(91, 76, 56, 0)'],
+          [visibleProgress, routeColor],
+          [1, routeColor]
+        ]
+      : [
+          [0, 'rgba(91, 76, 56, 0)'],
+          [startProgress, 'rgba(91, 76, 56, 0)'],
+          [visibleProgress, routeColor],
+          [edge, 'rgba(91, 76, 56, 0)'],
+          [1, 'rgba(91, 76, 56, 0)']
+        ]
+  );
 
   map.setPaintProperty(
     'migration-route',
@@ -2047,19 +2040,12 @@ function setAutumnRouteProgressPaint(
   // Keep the gradient stops strictly increasing.
   const start = Math.max(0, p - 0.001);
 
-  const gradient = [
-    'interpolate',
-    ['linear'],
-    ['line-progress'],
-
-    0, 'rgba(91, 76, 56, 0)',
-
-    start, 'rgba(91, 76, 56, 0)',
-
-    p, routeColor,
-
-    1, routeColor
-  ];
+  const gradient = createRouteProgressGradient([
+    [0, 'rgba(91, 76, 56, 0)'],
+    [start, 'rgba(91, 76, 56, 0)'],
+    [p, routeColor],
+    [1, routeColor]
+  ]);
 
   map.setPaintProperty(
     'migration-route',
@@ -2143,6 +2129,7 @@ function updateRouteProgress(
 
 flockProgress = value;
 updateFlockPosition(value);
+updateJourneyPosition();
 
       if (elapsed < 1) {
         flockAnimationFrame = requestAnimationFrame(animateFlock);
@@ -2167,6 +2154,7 @@ updateFlockPosition(value);
     );
     flockProgress = p;
     updateFlockPosition(p);
+    updateJourneyPosition();
     return;
   }
 
@@ -2178,6 +2166,7 @@ updateFlockPosition(value);
 
   flockProgress = p;
   updateFlockPosition(p);
+  updateJourneyPosition();
 
   if (
     route3dLayer
@@ -2398,6 +2387,15 @@ function updateFlockPosition(
   progress
 ) {
 
+  const routeCoordinatesAvailable = routeCoordinates.length >= 2
+    && routeLength > 0;
+  const rawMarkerProgress = routeCoordinatesAvailable
+    && Number.isFinite(progress)
+    ? Math.max(
+      routeStartProgress,
+      Math.min(1, progress + flockTravelDirection * 0.00035)
+    )
+    : null;
   if (
     !flockMarker
   ) {
@@ -2406,8 +2404,12 @@ function updateFlockPosition(
 
   }
 
+  const markerMinimum =
+    flockTravelDirection < 0
+      ? 0
+      : routeStartProgress;
   const markerProgress = Math.max(
-    routeStartProgress,
+    markerMinimum,
     Math.min(
       1,
       progress + flockTravelDirection * 0.00035
@@ -4063,10 +4065,13 @@ async function enterStateCaseStudy(caseStudy) {
   STORY = storyConfig.chapters;
   activeDialogues = storyConfig.dialogues;
   activeStoryId = storyConfig.id;
+  activeStoryConfig = storyConfig;
   activeSeasonCycle =
     storyConfig.seasons || SEASON_CYCLES.himachal;
   activeElevationRange =
     storyConfig.elevationRange || ELEVATION_RANGES.himachal;
+  miniMapController?.setState(miniMapConfigForStory());
+  elevationProfileRenderer?.setProfile(storyConfig.elevationProfile?.data || null);
   updateProgressStopsForStory();
 
 
@@ -4148,9 +4153,11 @@ async function enterStateCaseStudy(caseStudy) {
     storyPanel.classList.remove(
       'hidden'
     );
+    chapterIdentity.classList.remove('hidden');
 
 
     updateMapVisibility();
+    updateJourneyInterface();
 
     updateStoryPanel();
 
@@ -4212,6 +4219,7 @@ async function returnToAtlas() {
   storyPanel.classList.add(
     'hidden'
   );
+  chapterIdentity.classList.add('hidden');
 
 
   updateMapVisibility();
@@ -4268,17 +4276,18 @@ async function returnToAtlas() {
     STORY = HIMACHAL_STORY;
     activeDialogues = HIMACHAL_DIALOGUES;
     activeStoryId = 'himachal';
+    activeStoryConfig = STORY_REGISTRY.himachal;
     activeSeasonCycle = SEASON_CYCLES.himachal;
     activeElevationRange = ELEVATION_RANGES.himachal;
+    miniMapController?.setState(miniMapConfigForStory());
+    elevationProfileRenderer?.setProfile(activeStoryConfig.elevationProfile?.data || null);
     updateProgressStopsForStory();
-    updateSeasonIndicator();
-    updateElevationMeter(STORY[0]);
-
     flockProgress = routeStartProgress;
     updateFlockPosition(routeStartProgress);
 
 
     updateMapVisibility();
+    updateJourneyInterface();
 
   }
 
@@ -4309,20 +4318,6 @@ async function returnToAtlas() {
 
 
 // ============================================================
-// BACK BUTTON
-// ============================================================
-
-backToAtlasButton.addEventListener(
-
-  'click',
-
-  () => {
-
-    returnToAtlas();
-
-  }
-
-);
 
 
 // ============================================================
@@ -4333,6 +4328,9 @@ async function goToChapter(
   destinationIndex
 ) {
 
+  const destinationIsValid = Number.isInteger(destinationIndex)
+    && destinationIndex >= 0
+    && destinationIndex < STORY.length;
   if (
     atlasMode
     ||
@@ -4368,7 +4366,6 @@ async function goToChapter(
       destinationIndex
     ];
 
-
   cameraAnimating =
     true;
 
@@ -4398,17 +4395,6 @@ async function goToChapter(
 
             return travel.duration1 + travel.duration2;
           })();
-
-  if (
-    flockMarker
-  ) {
-
-    flockMarker.getElement().style.display = activeStoryId === 'himachal'
-      && destinationIndex >= 1
-      ? 'block'
-      : 'none';
-
-  }
 
   if (
     activeStoryId === 'himachal'
@@ -4560,8 +4546,8 @@ if (Number.isFinite(targetProgress)) {
     currentStoryIndex =
       destinationIndex;
 
-
     updateMapVisibility();
+    updateJourneyInterface();
 
     updateStoryPanel();
 
@@ -4933,16 +4919,17 @@ map.on(
       }
 
 
-      const routeResponse =
-        await fetch(
-          ISPUR_DARCHA_ROUTE_URL
-        );
+      let routeResponse;
+      try {
+        routeResponse = await fetch(ISPUR_DARCHA_ROUTE_URL);
+      } catch (error) {
+        throw error;
+      }
 
 
       if (
         !routeResponse.ok
       ) {
-
         throw new Error(
           `Could not load route: ${routeResponse.status}`
         );
@@ -4950,8 +4937,12 @@ map.on(
       }
 
 
-      const routeGeoJSON =
-        await routeResponse.json();
+      let routeGeoJSON;
+      try {
+        routeGeoJSON = await routeResponse.json();
+      } catch (error) {
+        throw error;
+      }
 
       prepareRouteCoordinates(
         routeGeoJSON
